@@ -19,7 +19,7 @@ window.onload = () => {
                 debug: true
             }
         },
-        scene: [SceneMain, NextScene]
+        scene: [SceneMain, GameOverScene, TitleScene]
     };
 
     game = new Phaser.Game(config);
