@@ -22,22 +22,28 @@ class SceneMain extends Phaser.Scene {
         this.cursors = this.input.keyboard.createCursorKeys();
 
     }
-    update() {
 
+    update() {
         // let the hero moves (stop if key in not pushed)
-        if (this.cursors.left.isDown) {
+        if (this.cursors.left.isDown && !this.cursors.right.isDown) {
             this.hero.setVelocityX(-160);
-        } else if (this.cursors.right.isDown) {
+        } else if (!this.cursors.left.isDown && this.cursors.right.isDown){
             this.hero.setVelocityX(160);
-        } else if (this.cursors.up.isDown) {
-            this.hero.setVelocityY(-160);
-        } else if (this.cursors.down.isDown) {
-            this.hero.setVelocityY(160)
         } else {
             this.hero.setVelocityX(0);
+        }
+        if (this.cursors.up.isDown && !this.cursors.down.isDown) {
+            this.hero.setVelocityY(-160);
+        } else if (!this.cursors.up.isDown && this.cursors.down.isDown){
+            this.hero.setVelocityY(160);
+        } else {
             this.hero.setVelocityY(0);
         }
-        
+        // If moving diagonally, limit the speed to the same as if you were moving along only one axis
+        if(this.hero.body.velocity.x && this.hero.body.velocity.y) {
+            this.hero.body.velocity.x *= Math.SQRT1_2
+            this.hero.body.velocity.y *= Math.SQRT1_2
+        }
     }
     customFunctions() {
         //  our custom functions to call them when we need
