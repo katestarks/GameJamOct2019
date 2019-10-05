@@ -21,6 +21,8 @@ class SceneMain extends Phaser.Scene {
         // generate keyboard keys
         this.cursors = this.input.keyboard.createCursorKeys();
 
+        this.input.on('pointerdown', () => this.scene.start('NextScene'))
+
     }
 
     update() {
