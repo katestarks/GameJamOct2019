@@ -1,0 +1,24 @@
+class TitleScene extends Phaser.Scene {
+    constructor() {
+        super('TitleScene')
+    }
+    preload() {
+
+        this.load.image('sprite', 'assets/sprite.png');
+    }
+    create() {
+
+        // vars to set obj in the center of the game screen
+        this.centerX = game.config.width/2;
+        this.centerY = game.config.height/2;
+
+        // placing star in the center of the screen
+        this.star = this.physics.add.sprite(this.centerX, this.centerY, 'sprite');
+
+        this.input.on('pointerdown', () => this.scene.start('SceneMain'))
+
+    }
+    update(){
+
+    }
+}
