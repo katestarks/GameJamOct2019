@@ -5,6 +5,7 @@ class SceneMain extends Phaser.Scene {
     preload() {
 
         this.load.image('hero', 'images/hero.png');
+        this.load.image('star', 'images/star.png')
     }
     create() {
 
@@ -20,6 +21,13 @@ class SceneMain extends Phaser.Scene {
 
         // generate keyboard keys
         this.cursors = this.input.keyboard.createCursorKeys();
+
+        // placing light 'switch' on screen
+        this.lightswitch = this.physics.add.sprite(50, 0, 'star');
+
+        // collider between lightswitch and edge of the scene
+        this.lightswitch.body.collideWorldBounds = true;
+        this.lightswitch.setScale(2);
 
     }
     update() {
@@ -38,8 +46,38 @@ class SceneMain extends Phaser.Scene {
             this.hero.setVelocityY(0);
         }
         
+        console.log(this.distanceFromHero(this.lightswitch))
+        this.fadeIn(this.lightswitch);
+        this.fadeOut(this.lightswitch);
     }
-    customFunctions() {
-        //  our custom functions to call them when we need
+
+    fadeIn(el)
+    {
+        el.alpha += 0.1;
+        if(el.alpha > 1.0) {
+            el.alpha = 1.0;
+        } else {
+            setTimeout(() => this.fadeIn(el), 500);
+        }
     }
+
+    fadeOut(el)
+    {
+        el.alpha -= 0.1;
+        if(el.alpha < 0.0) {
+            el.alpha = 0.0;
+        } else {
+            setTimeout(() => this.fadeOut(el), 500);
+        }
+    }
+
+    distanceFromHero(el) 
+    {
+        let xCoord = Math.abs(el.body.x - this.hero.body.x)
+        let yCoord = Math.abs(el.body.y - this.hero.body.y)
+
+        return xCoord + yCoord
+
+    }
+
 }
