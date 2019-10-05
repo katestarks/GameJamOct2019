@@ -5,12 +5,22 @@ class SceneMain extends Phaser.Scene {
     preload() {
 
         this.load.image('hero', 'images/hero.png');
+        this.load.image('star', 'images/star.png')
     }
     create() {
 
         // vars to set obj in the center of the game screen
-        this.centerX = game.config.width/2;
-        this.centerY = game.config.height/2;
+        this.centerX = this.game.config.width/2;
+        this.centerY = this.game.config.height/2;
+
+        // placing light 'switch' on screen
+        this.lightswitch = this.physics.add.sprite(50, 50, 'star');
+
+
+        //CREATE ALL ASSETS ABOVE THIS LINE
+
+        // Darkness rectangle
+
 
         // placing hero in the center of the screen
         this.hero = this.physics.add.sprite(this.centerX, this.centerY, 'hero');
@@ -20,6 +30,10 @@ class SceneMain extends Phaser.Scene {
 
         // generate keyboard keys
         this.cursors = this.input.keyboard.createCursorKeys();
+
+        // Lightswitch scale and initial alpha
+        this.lightswitch.setScale(2);
+        this.setLightToAlpha(this.distanceFromHero(this.lightswitch), 250)
 
     }
 
@@ -39,13 +53,35 @@ class SceneMain extends Phaser.Scene {
         } else {
             this.hero.setVelocityY(0);
         }
+
         // If moving diagonally, limit the speed to the same as if you were moving along only one axis
         if(this.hero.body.velocity.x && this.hero.body.velocity.y) {
+            
+
             this.hero.body.velocity.x *= Math.SQRT1_2
             this.hero.body.velocity.y *= Math.SQRT1_2
         }
+
+        // If hero is moving in any direction
+        if (this.hero.body.velocity.x || this.hero.body.velocity.y) {
+            this.setLightToAlpha(this.distanceFromHero(this.lightswitch), 250)
+        }
     }
-    customFunctions() {
-        //  our custom functions to call them when we need
+
+    distanceFromHero(el) 
+    {
+        let xCoord = Math.abs(el.body.x - this.hero.body.x)
+        let yCoord = Math.abs(el.body.y - this.hero.body.y)
+
+        return xCoord + yCoord
     }
+
+    setLightToAlpha(distance, scale) {
+        let alpha = 1 - (distance/scale)
+        if (alpha < 0) {
+            alpha = 0
+        }
+        this.lightswitch.alpha = alpha
+    }
+
 }
