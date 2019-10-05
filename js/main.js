@@ -5,20 +5,14 @@ window.onload = () => {
     var config = {
         type: Phaser.AUTO,
         width: 600,
-        height: 800,
-        physics: {
-            default: 'arcade',
-            arcade: {
-                debug: false
-            }
-        },
-        parent: 'phaser-game',
+        height: 600,
         physics: {
             default: 'arcade',
             arcade: {
                 debug: true
             }
         },
+        parent: 'phaser-game',
         scene: [SceneMain]
     };
 

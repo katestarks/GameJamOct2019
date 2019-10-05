@@ -2,9 +2,16 @@ class SceneMain extends Phaser.Scene {
     constructor() {
         super('SceneMain');
     }
-    preload() {
 
-        this.load.image('hero', 'images/hero.png');
+    // getYFromIndex = index =>  Math.floor(index / 10);
+
+    // getXFromIndex = index => index - (Math.floor(index / 10) * 10);
+
+    preload() {
+        this.load.image('Hero', 'images/hero.png');
+        this.load.image('Door', 'images/door.png');
+        this.load.image('Light', 'images/light.png');
+        this.load.image('Wall', 'images/wall.png');
     }
     create() {
 
@@ -13,13 +20,53 @@ class SceneMain extends Phaser.Scene {
         this.centerY = game.config.height/2;
 
         // placing hero in the center of the screen
-        this.hero = this.physics.add.sprite(this.centerX, this.centerY, 'hero');
+        this.hero = this.physics.add.sprite(this.centerX, this.centerY, 'Hero');
+        this.door = this.physics.add.sprite(this.centerX, this.centerY, 'Door');
+        this.light = this.physics.add.sprite(this.centerX, this.centerY, 'Light');
+        this.wall = this.physics.add.staticGroup();
+        
+        // this.physics.add.collider(this.wall, this.hero, this.hitWall());
 
         // collider between hero and edge of the scene
         this.hero.body.collideWorldBounds = true;
 
         // generate keyboard keys
         this.cursors = this.input.keyboard.createCursorKeys();
+
+        this.gridConfig = {rows: 10, cols: 10, scene: this};
+        this.alignGrid = new AlignGrid(this.gridConfig);
+        this.alignGrid.show();
+        this.alignGrid.showNumbers();
+
+
+
+        let count = 0;
+        levels.levelTwo.forEach(row => {
+            row.forEach(position => {
+                // if (count > 0) {
+
+                // } else {
+                switch(position) {
+                    case 'f':
+                        break;
+                    case 'w':
+                        this.wall.create(this.centerX, this.centerY, 'Wall');
+                        this.alignGrid.placeAtIndex(count, this.wall);
+                        this.physics.add.collider(this.wall, this.hero);
+                        break;
+                    case 'd':
+                        this.alignGrid.placeAtIndex(count, this.door);
+                        break;
+                    case 't':
+                        this.alignGrid.placeAtIndex(count, this.light);
+                        break;
+                    case 'h':
+                        this.alignGrid.placeAtIndex(count, this.hero);
+                        break;
+                }
+                count++;
+            })
+        })
 
     }
 
@@ -45,7 +92,8 @@ class SceneMain extends Phaser.Scene {
             this.hero.body.velocity.y *= Math.SQRT1_2
         }
     }
-    customFunctions() {
-        //  our custom functions to call them when we need
+    
+    hitWall() {
+        console.log('boom');
     }
 }
