@@ -15,7 +15,7 @@ class TitleScene extends Phaser.Scene {
         // placing star in the center of the screen
         this.star = this.physics.add.sprite(this.centerX, this.centerY, 'star');
 
-        this.input.on('pointerdown', () => this.scene.start('GameOverScene'))
+        this.input.on('pointerdown', () => this.scene.start('SceneMain'))
 
     }
     update(){
