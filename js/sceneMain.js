@@ -10,8 +10,8 @@ class SceneMain extends Phaser.Scene {
     create() {
 
         // vars to set obj in the center of the game screen
-        this.centerX = game.config.width/2;
-        this.centerY = game.config.height/2;
+        this.centerX = this.game.config.width/2;
+        this.centerY = this.game.config.height/2;
 
         // placing light 'switch' on screen
         this.lightswitch = this.physics.add.sprite(50, 0, 'star');
@@ -34,6 +34,7 @@ class SceneMain extends Phaser.Scene {
         // collider between lightswitch and edge of the scene
         this.lightswitch.body.collideWorldBounds = true;
         this.lightswitch.setScale(2);
+        this.setLightToAlpha(this.distanceFromHero(this.lightswitch), 250)
 
     }
 
@@ -56,6 +57,8 @@ class SceneMain extends Phaser.Scene {
 
         // If moving diagonally, limit the speed to the same as if you were moving along only one axis
         if(this.hero.body.velocity.x && this.hero.body.velocity.y) {
+            
+
             this.hero.body.velocity.x *= Math.SQRT1_2
             this.hero.body.velocity.y *= Math.SQRT1_2
         }
