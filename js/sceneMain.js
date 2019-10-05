@@ -14,7 +14,7 @@ class SceneMain extends Phaser.Scene {
         this.centerY = this.game.config.height/2;
 
         // placing light 'switch' on screen
-        this.lightswitch = this.physics.add.sprite(50, 0, 'star');
+        this.lightswitch = this.physics.add.sprite(50, 50, 'star');
 
 
         //CREATE ALL ASSETS ABOVE THIS LINE
@@ -31,8 +31,7 @@ class SceneMain extends Phaser.Scene {
         // generate keyboard keys
         this.cursors = this.input.keyboard.createCursorKeys();
 
-        // collider between lightswitch and edge of the scene
-        this.lightswitch.body.collideWorldBounds = true;
+        // Lightswitch scale and initial alpha
         this.lightswitch.setScale(2);
         this.setLightToAlpha(this.distanceFromHero(this.lightswitch), 250)
 
