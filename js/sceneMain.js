@@ -4,10 +4,13 @@ class SceneMain extends Phaser.Scene {
     }
     preload() {
         // load our images or sounds
+        this.load.image('sprite', 'assets/sprite.png');
     }
     create() {
         console.log("Ready!");
         //  define our objects
+        player = this.physics.add.sprite(150, 150, 'sprite');
+        player.setCollideWorldBounds(true);
     }
     update() {
         //  constant running loop
