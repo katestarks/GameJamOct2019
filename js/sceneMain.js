@@ -3,6 +3,7 @@ class SceneMain extends Phaser.Scene {
         super('SceneMain');
     }
     preload() {
+
         this.load.image('hero', 'images/hero.png');
     }
     create() {
