@@ -25,4 +25,3 @@ window.onload = () => {
     game = new Phaser.Game(config);
 
 }
-
