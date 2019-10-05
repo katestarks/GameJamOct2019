@@ -9,7 +9,7 @@ class SceneMain extends Phaser.Scene {
     create() {
         console.log("Ready!");
         //  define our objects
-        player = this.physics.add.sprite(150, 150, 'sprite');
+        const player = this.physics.add.sprite(150, 150, 'sprite');
         player.setCollideWorldBounds(true);
     }
     update() {
