@@ -6,20 +6,14 @@ window.onload = () => {
         type: Phaser.AUTO,
         width: 600,
         height: 600,
-        physics: {
-            default: 'arcade',
-            arcade: {
-                debug: false
-            }
-        },
         parent: 'phaser-game',
         physics: {
             default: 'arcade',
             arcade: {
-                debug: false
+                debug: true
             }
         },
-        scene: [SceneMain]
+        scene: [SceneTitle, SceneMain]
     }
 
     game = new Phaser.Game(config);
