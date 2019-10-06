@@ -1,5 +1,6 @@
 var game;
-window.onload = function () {
+
+window.onload = () => {
 
     var config = {
         type: Phaser.AUTO,
@@ -15,12 +16,12 @@ window.onload = function () {
         physics: {
             default: 'arcade',
             arcade: {
-                debug: true
+                debug: false
             }
         },
         scene: [SceneMain]
     }
 
-    var game = new Phaser.Game(config);
+    game = new Phaser.Game(config);
 
 }
