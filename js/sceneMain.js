@@ -24,170 +24,10 @@ class SceneMain extends Phaser.Scene {
         this.load.audio('lightOnMusic', 'sounds/happy_music.mp3');
     }
 
-    create() {
-        var background = this.add.image(0, 0, 'background')
-        background.scaleX = this.game.config.width / background.scaleX 
-        background.scaleY = this.game.config.height / background.scaleY 
-
-        // vars to set obj in the center of the game screen
-        this.centerX = this.game.config.width/2;
-        this.centerY = this.game.config.height/2;
-
-        // Attention future people - do this for a dynamic group of sprites with collision
-        this.wallGroup  = this.physics.add.group();
-        this.wallGroup.enableBody = true;
-        this.wallGroup.physicsBodyType = Phaser.Physics.ARCADE;
-
-        // placing sprites in the center of the screen
-        this.door = this.physics.add.sprite(this.centerX, this.centerY, 'door');
-        this.door.setScale(0.25);
-        this.light = this.physics.add.sprite(this.centerX, this.centerY, 'light');
-
-        // placing hero in the center of the screen
-        this.hero = this.physics.add.sprite(this.centerX, this.centerY, 'hero');
-        this.hero.setScale(0.1)
-        this.hero.setDepth(1)
-
-        // Standard floor tiles
-        this.floorGroup  = this.physics.add.group();
-
-        // Trigger floor tiles that will switch off the light
-        this.triggerFloorGroup  = this.physics.add.group();
-        this.triggerFloorGroup.enableBody = true;
-        this.triggerFloorGroup.physicsBodyType = Phaser.Physics.ARCADE;
-        this.physics.add.overlap(this.hero, this.triggerFloorGroup, () => {
-            this.turnOffLight({onDuration: 500})
-        });
-
-        // collider between hero and edge of the scene
-        this.hero.body.collideWorldBounds = true;
-
-        // add animation to hero movement
-        this.anims.create({
-            key: 'left',
-            frames: this.anims.generateFrameNumbers('hero', { start: 3, end: 4 }),
-            frameRate: 7,
-            repeat: -1
-        });
-
-        this.anims.create({
-            key: 'right',
-            frames: this.anims.generateFrameNumbers('hero', { start: 1, end: 2 }),
-            frameRate: 7,
-            repeat: -1
-        });
-
-        this.anims.create({
-            key: 'up',
-            frames: this.anims.generateFrameNumbers('hero', { start: 7, end: 8 }),
-            frameRate: 7,
-            repeat: -1
-        });
-
-        this.anims.create({
-            key: 'down',
-            frames: this.anims.generateFrameNumbers('hero', { start: 5, end: 6 }),
-            frameRate: 7,
-            repeat: -1
-        });
-
-        this.anims.create({
-            key: 'stop',
-            frames: [ { key: 'hero', frame: 0 } ],
-            frameRate: 20
-        });
-
-        // generate keyboard keys
-        this.cursors = this.input.keyboard.createCursorKeys();
-
-        // create grid on the game scene
-        this.gridConfig = {rows: 10, cols: 10, scene: this};
-        this.alignGrid = new AlignGrid(this.gridConfig);
-
-        // let the grid visible with index number
-        this.alignGrid.show();
-        this.alignGrid.showNumbers();
-
-        // generate game screen from bi-dimensional array on sceneMap
-        let count = 0;
-        let wall;
-        let floor;
-        let trigger_floor;
-        levels.levelTwo.forEach(row => {
-            row.forEach(position => {
-                switch(position) {
-                    case 'f':
-                        floor = this.floorGroup.create(this.centerX, this.centerY, 'floor').setScale(this.alignGrid.scaleToTileSize());
-                        floor.body.immovable = true;
-                        this.alignGrid.placeAtIndex(count, floor);
-                        break;
-                    case 't':
-                        trigger_floor = this.triggerFloorGroup.create(this.centerX, this.centerY, 'trigger_floor').setScale(this.alignGrid.scaleToTileSize());
-                        trigger_floor.body.immovable = true;
-                        this.alignGrid.placeAtIndex(count, trigger_floor);
-                        break;
-                    case 'w':
-                        // Attention future people - do this for a dynamic group of sprites with collision
-                        wall = this.wallGroup.create(this.centerX, this.centerY, 'wall');
-                        wall.setScale(0.25)
-                        wall.body.immovable = true;
-                        this.alignGrid.placeAtIndex(count, wall);
-                        break;
-                    case 'd':
-                        this.alignGrid.placeAtIndex(count, this.door);
-                        break;
-                    case 'l':
-                        this.alignGrid.placeAtIndex(count, this.light);
-                        break;
-                    case 'h':
-                        this.alignGrid.placeAtIndex(count, this.hero);
-                        break;
-                }
-                count++;
-            })
-        })
-
-        //CREATE ALL ASSETS ABOVE THIS LINE
-
-        // Darkness rectangle
-        this.foreground = this.add.image(0, 0, 'foreground')
-        this.foreground.scaleX = this.game.config.width / this.foreground.scaleX
-        this.foreground.scaleY = this.game.config.height / this.foreground.scaleY
-        
-        this.spotlight = this.make.sprite({
-            x: 300,
-            y: 300,
-            key: 'mask',
-            add: false
-        });
-        this.spotlight.alpha = 0
-
-        this.foreground.mask = new Phaser.Display.Masks.BitmapMask(this, this.spotlight)
-        this.foreground.mask.invertAlpha = true
-        this.foreground.mask.bitmapMask.scale = 3
-
-        // Attention future people - do this for a dynamic group of sprites with collision
-        this.physics.add.collider(this.wallGroup, this.hero)
-
-        // Lightswitch scale and initial alpha and depth
-        this.light.setDepth(10)
-        this.light.setScale(0.2);
-        this.light.alpha = 0;
-
-        this.physics.add.overlap(this.hero, this.light, () => this.turnOnLight(), null, this);
-        this.pressedLightSwitch = false
-
-        this.lightSwitchSound = this.sound.add('lightSwitch')
-        
-        this.lightTurningOn = null;
-        this.lightTurningOff = null;
-        this.lightTriggeringOff = null;
-
-        this.backgroundMusic = this.sound.add('backgroundMusic', {loop: true, volume: 0.5});
-        this.backgroundMusic.play();
-
-        this.lightOnMusic = this.sound.add('lightOnMusic', {loop: true, volume: 0});
-        this.lightOnMusic.play()
+    create() {        
+        this.levelCounter = 0;
+                
+        this.buildMap(levels, this.levelCounter);
     }
 
     update() {
@@ -267,6 +107,7 @@ class SceneMain extends Phaser.Scene {
     }
 
     turnOnLight(options = {}) {
+        this.touchedLight = true;
         this.pressingLightSwitch = true
         if (!this.pressedLightSwitch) {
             this.cancelLightAnimations()
@@ -355,6 +196,171 @@ class SceneMain extends Phaser.Scene {
         if (this.lightTriggeringOff) {
             this.lightTriggeringOff.stop();
             this.lightTriggeringOff = null;
+        }
+    }
+
+    buildMap = (levels, levelCounter) => {
+
+        var background = this.add.image(0, 0, 'background')
+        background.scaleX = this.game.config.width / background.scaleX 
+        background.scaleY = this.game.config.height / background.scaleY 
+
+        // vars to set obj in the center of the game screen
+        this.centerX = this.game.config.width/2;
+        this.centerY = this.game.config.height/2;
+
+
+        // generate keyboard keys
+        this.cursors = this.input.keyboard.createCursorKeys();
+
+
+        // create grid on the game scene
+        this.gridConfig = {rows: 10, cols: 10, scene: this};
+        this.alignGrid = new AlignGrid(this.gridConfig);
+
+        // let the grid visible with index number
+        this.alignGrid.show();
+        this.alignGrid.showNumbers();
+
+        this.touchedLight = false;
+        // Attention future people - do this for a dynamic group of sprites with collision
+        this.wallGroup  = this.physics.add.group();
+        this.wallGroup.enableBody = true;
+        this.wallGroup.physicsBodyType = Phaser.Physics.ARCADE;
+
+        // placing sprites in the center of the screen
+        this.door = this.physics.add.sprite(this.centerX, this.centerY, 'door');
+        this.door.setScale(0.25);
+        this.light = this.physics.add.sprite(this.centerX, this.centerY, 'light');
+
+        // placing hero in the center of the screen
+        this.hero = this.physics.add.sprite(this.centerX, this.centerY, 'hero');
+        this.hero.setScale(0.1)
+
+        // collider between hero and edge of the scene
+        this.hero.body.collideWorldBounds = true;
+
+        // add animation to hero movement
+        this.anims.create({
+            key: 'left',
+            frames: this.anims.generateFrameNumbers('hero', { start: 3, end: 4 }),
+            frameRate: 7,
+            repeat: -1
+        });
+
+        this.anims.create({
+            key: 'right',
+            frames: this.anims.generateFrameNumbers('hero', { start: 1, end: 2 }),
+            frameRate: 7,
+            repeat: -1
+        });
+
+        this.anims.create({
+            key: 'up',
+            frames: this.anims.generateFrameNumbers('hero', { start: 7, end: 8 }),
+            frameRate: 7,
+            repeat: -1
+        });
+
+        this.anims.create({
+            key: 'down',
+            frames: this.anims.generateFrameNumbers('hero', { start: 5, end: 6 }),
+            frameRate: 7,
+            repeat: -1
+        });
+
+        this.anims.create({
+            key: 'stop',
+            frames: [ { key: 'hero', frame: 0 } ],
+            frameRate: 20
+        });
+        
+        // generate game screen from bi-dimensional array on sceneMap
+        let count = 0;
+        let wall;
+        levels[levelCounter].forEach(row => {
+            row.forEach(position => {
+                switch(position) {
+                    case 'f':
+                        break;
+                    case 'w':
+                            // Attention future people - do this for a dynamic group of sprites with collision
+                            wall = this.wallGroup.create(this.centerX, this.centerY, 'wall');
+                            wall.setScale(0.25)
+                            wall.body.immovable = true;
+                            this.alignGrid.placeAtIndex(count, wall);
+                        break;
+                    case 'd':
+                        this.alignGrid.placeAtIndex(count, this.door);
+                        break;
+                    case 't':
+                        this.alignGrid.placeAtIndex(count, this.light);
+                        break;
+                    case 'h':
+                        this.alignGrid.placeAtIndex(count, this.hero);
+                        break;
+                }
+                count++;
+            })
+        })
+
+        // Darkness rectangle
+        this.foreground = this.add.image(0, 0, 'foreground')
+        this.foreground.scaleX = this.game.config.width / this.foreground.scaleX
+        this.foreground.scaleY = this.game.config.height / this.foreground.scaleY
+        
+        this.spotlight = this.make.sprite({
+            x: 300,
+            y: 300,
+            key: 'mask',
+            add: false
+        });
+        this.spotlight.alpha = 0
+
+        this.foreground.mask = new Phaser.Display.Masks.BitmapMask(this, this.spotlight)
+        this.foreground.mask.invertAlpha = true
+        this.foreground.mask.bitmapMask.scale = 3
+
+        // Attention future people - do this for a dynamic group of sprites with collision
+        this.physics.add.collider(this.wallGroup, this.hero)
+
+        this.physics.add.overlap(this.hero, this.door, this.nextLevel)
+
+        // Lightswitch scale and initial alpha
+        this.light.setScale(0.2);
+        this.setLightToAlpha(this.distanceFromHero(this.light), 250)
+        // Lightswitch scale and initial alpha and depth
+        this.light.setDepth(10)
+        this.light.alpha = 0;
+
+
+        this.physics.add.overlap(this.hero, this.light, () => this.turnOnLight(), null, this);
+        this.pressedLightSwitch = false
+
+        this.lightSwitchSound = this.sound.add('lightSwitch')
+
+        this.backgroundMusic = this.sound.add('backgroundMusic', {loop: true, volume: 0.5});
+        this.backgroundMusic.play();
+
+        this.lightOnMusic = this.sound.add('lightOnMusic', {loop: true, volume: 0});
+        this.lightOnMusic.play()
+        
+        this.lightTurningOn = null;
+        this.lightTurningOff = null;
+        this.lightTriggeringOff = null;
+    }
+
+    nextLevel = () => {
+        if(this.touchedLight) {
+            this.levelCounter++;
+            if(this.levelCounter >= levels.length) {
+                this.levelCounter = 0
+            }
+            this.wallGroup.clear(true, true);
+            this.hero.destroy();
+            this.light.destroy();
+            this.door.destroy();
+            this.buildMap(levels, this.levelCounter)
         }
     }
 }
