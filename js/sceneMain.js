@@ -27,9 +27,9 @@ class SceneMain extends Phaser.Scene {
 
 
         // placing sprites in the center of the screen
-        this.hero = this.physics.add.sprite(this.centerX, this.centerY, 'Hero');
-        this.door = this.physics.add.sprite(this.centerX, this.centerY, 'Door');
-        this.light = this.physics.add.sprite(this.centerX, this.centerY, 'Light');
+        this.hero = this.physics.add.sprite(this.centerX, this.centerY, 'hero');
+        this.door = this.physics.add.sprite(this.centerX, this.centerY, 'door');
+        this.light = this.physics.add.sprite(this.centerX, this.centerY, 'light');
 
         // Attention future people - do this for a dynamic group of sprites with collision
         this.wallGroup  = this.physics.add.group();
@@ -61,7 +61,7 @@ class SceneMain extends Phaser.Scene {
                         break;
                     case 'w':
                             // Attention future people - do this for a dynamic group of sprites with collision
-                            wall = this.wallGroup.create(this.centerX, this.centerY, 'Wall');
+                            wall = this.wallGroup.create(this.centerX, this.centerY, 'wall');
                             wall.body.immovable = true;
                             this.alignGrid.placeAtIndex(count, wall);
                         break;
