@@ -4,19 +4,22 @@ class SceneMain extends Phaser.Scene {
         super('SceneMain');
     }
     preload() {
+
         // Images
-        this.load.image('hero', 'images/hero.png');
-        this.load.image('star', 'images/star.png')
+        this.load.spritesheet('hero', 'images/heroSheet.png', {
+            frameWidth: 627, frameHeight: 625
+        });
+        this.load.image('light', 'images/lightbulb.png');
         this.load.image('background', 'images/background.png')
         this.load.image('foreground', 'images/black_layer.png')
         this.load.image('mask', 'images/light-mask.png')
 		this.load.image('door', 'images/door.png');
-        this.load.image('light', 'images/light.png');
         this.load.image('wall', 'images/wall.png');
         
 
         // Sound effects
         this.load.audio('lightSwitch', 'sound_effects/light_switch.mp3')
+
     }
 
     create() {
@@ -28,18 +31,56 @@ class SceneMain extends Phaser.Scene {
         this.centerX = this.game.config.width/2;
         this.centerY = this.game.config.height/2;
 
-        // placing sprites in the center of the screen
-        this.hero = this.physics.add.sprite(this.centerX, this.centerY, 'hero');
-        this.door = this.physics.add.sprite(this.centerX, this.centerY, 'door');
-        this.light = this.physics.add.sprite(this.centerX, this.centerY, 'light');
-
         // Attention future people - do this for a dynamic group of sprites with collision
         this.wallGroup  = this.physics.add.group();
         this.wallGroup.enableBody = true;
         this.wallGroup.physicsBodyType = Phaser.Physics.ARCADE;
 
+        // placing sprites in the center of the screen
+        this.door = this.physics.add.sprite(this.centerX, this.centerY, 'door');
+        this.light = this.physics.add.sprite(this.centerX, this.centerY, 'light');
+
+        // placing hero in the center of the screen
+        this.hero = this.physics.add.sprite(this.centerX, this.centerY, 'hero');
+        this.hero.setScale(0.1)
+
         // collider between hero and edge of the scene
         this.hero.body.collideWorldBounds = true;
+
+        // add animation to hero movement
+        this.anims.create({
+            key: 'left',
+            frames: this.anims.generateFrameNumbers('hero', { start: 3, end: 4 }),
+            frameRate: 7,
+            repeat: -1
+        });
+
+        this.anims.create({
+            key: 'right',
+            frames: this.anims.generateFrameNumbers('hero', { start: 1, end: 2 }),
+            frameRate: 7,
+            repeat: -1
+        });
+
+        this.anims.create({
+            key: 'up',
+            frames: this.anims.generateFrameNumbers('hero', { start: 7, end: 8 }),
+            frameRate: 7,
+            repeat: -1
+        });
+
+        this.anims.create({
+            key: 'down',
+            frames: this.anims.generateFrameNumbers('hero', { start: 5, end: 6 }),
+            frameRate: 7,
+            repeat: -1
+        });
+
+        this.anims.create({
+            key: 'stop',
+            frames: [ { key: 'hero', frame: 0 } ],
+            frameRate: 20
+        });
 
         // generate keyboard keys
         this.cursors = this.input.keyboard.createCursorKeys();
@@ -64,6 +105,7 @@ class SceneMain extends Phaser.Scene {
                     case 'w':
                             // Attention future people - do this for a dynamic group of sprites with collision
                             wall = this.wallGroup.create(this.centerX, this.centerY, 'wall');
+                            wall.setScale(0.25)
                             wall.body.immovable = true;
                             this.alignGrid.placeAtIndex(count, wall);
                         break;
@@ -103,15 +145,12 @@ class SceneMain extends Phaser.Scene {
         // Attention future people - do this for a dynamic group of sprites with collision
         this.physics.add.collider(this.wallGroup, this.hero)
 
-        // placing light 'switch' on screen
-        this.lightswitch = this.physics.add.sprite(50, 50, 'star');
-
         // Lightswitch scale and initial alpha
-        this.lightswitch.setScale(2);
-        this.setLightToAlpha(this.distanceFromHero(this.lightswitch), 200)
+        this.light.setScale(0.2);
+        this.setLightToAlpha(this.distanceFromHero(this.light), 250)
 
 
-        this.physics.add.overlap(this.hero, this.lightswitch, () => this.turnOnLight(), null, this);
+        this.physics.add.overlap(this.hero, this.light, () => this.turnOnLight(), null, this);
         this.pressedLightSwitch = false
 
         this.lightSwitchSound = this.sound.add('lightSwitch')
@@ -121,17 +160,26 @@ class SceneMain extends Phaser.Scene {
         // let the hero moves (stop if key in not pushed)
         if (this.cursors.left.isDown && !this.cursors.right.isDown) {
             this.hero.setVelocityX(-160);
+            this.hero.anims.play('left', true); 
         } else if (!this.cursors.left.isDown && this.cursors.right.isDown){
             this.hero.setVelocityX(160);
+            this.hero.anims.play('right', true); 
         } else {
             this.hero.setVelocityX(0);
         }
         if (this.cursors.up.isDown && !this.cursors.down.isDown) {
             this.hero.setVelocityY(-160);
+            this.hero.anims.play('up', true); 
         } else if (!this.cursors.up.isDown && this.cursors.down.isDown){
             this.hero.setVelocityY(160);
+            this.hero.anims.play('down', true); 
         } else {
             this.hero.setVelocityY(0);
+        }
+
+        if (!this.cursors.left.isDown && !this.cursors.right.isDown && 
+            !this.cursors.up.isDown && !this.cursors.down.isDown){
+            this.hero.anims.play('stop', true);
         }
 
         // If moving diagonally, limit the speed to the same as if you were moving along only one axis
@@ -142,7 +190,7 @@ class SceneMain extends Phaser.Scene {
 
         // If hero is moving in any direction
         if (this.hero.body.velocity.x || this.hero.body.velocity.y) {
-            let distance = this.distanceFromHero(this.lightswitch)
+            let distance = this.distanceFromHero(this.light)
             this.setLightToAlpha(distance, 200)
             this.foreground.mask.bitmapMask.x = this.hero.x
             this.foreground.mask.bitmapMask.y = this.hero.y
@@ -166,7 +214,7 @@ class SceneMain extends Phaser.Scene {
         if (alpha < 0) {
             alpha = 0
         }
-        this.lightswitch.alpha = alpha
+        this.light.alpha = alpha
     }
 
     turnOnLight(options = {}) {
