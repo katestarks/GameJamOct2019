@@ -1,11 +1,8 @@
 class SceneMain extends Phaser.Scene {
+    
     constructor() {
         super('SceneMain');
     }
-
-    // getYFromIndex = index =>  Math.floor(index / 10);
-
-    // getXFromIndex = index => index - (Math.floor(index / 10) * 10);
 
     preload() {
         this.load.image('Hero', 'images/hero.png');
@@ -13,19 +10,21 @@ class SceneMain extends Phaser.Scene {
         this.load.image('Light', 'images/light.png');
         this.load.image('Wall', 'images/wall.png');
     }
-    create() {
 
+    create() {
         // vars to set obj in the center of the game screen
         this.centerX = game.config.width/2;
         this.centerY = game.config.height/2;
 
-        // placing hero in the center of the screen
+        // placing sprites in the center of the screen
         this.hero = this.physics.add.sprite(this.centerX, this.centerY, 'Hero');
         this.door = this.physics.add.sprite(this.centerX, this.centerY, 'Door');
         this.light = this.physics.add.sprite(this.centerX, this.centerY, 'Light');
-        this.wall = this.physics.add.staticGroup();
-        
-        // this.physics.add.collider(this.wall, this.hero, this.hitWall());
+
+        // Attention future people - do this for a dynamic group of sprites with collision
+        this.wallGroup  = this.physics.add.group();
+        this.wallGroup.enableBody = true;
+        this.wallGroup.physicsBodyType = Phaser.Physics.ARCADE;
 
         // collider between hero and edge of the scene
         this.hero.body.collideWorldBounds = true;
@@ -33,26 +32,27 @@ class SceneMain extends Phaser.Scene {
         // generate keyboard keys
         this.cursors = this.input.keyboard.createCursorKeys();
 
+        // create grid on the game scene
         this.gridConfig = {rows: 10, cols: 10, scene: this};
         this.alignGrid = new AlignGrid(this.gridConfig);
+
+        // let the grid visible with index number
         this.alignGrid.show();
         this.alignGrid.showNumbers();
 
-
-
+        // generate game screen from bi-dimensional array on sceneMap
         let count = 0;
+        let wall;
         levels.levelTwo.forEach(row => {
             row.forEach(position => {
-                // if (count > 0) {
-
-                // } else {
                 switch(position) {
                     case 'f':
                         break;
                     case 'w':
-                        this.wall.create(this.centerX, this.centerY, 'Wall');
-                        this.alignGrid.placeAtIndex(count, this.wall);
-                        this.physics.add.collider(this.wall, this.hero);
+                            // Attention future people - do this for a dynamic group of sprites with collision
+                            wall = this.wallGroup.create(this.centerX, this.centerY, 'Wall');
+                            wall.body.immovable = true;
+                            this.alignGrid.placeAtIndex(count, wall);
                         break;
                     case 'd':
                         this.alignGrid.placeAtIndex(count, this.door);
@@ -67,7 +67,8 @@ class SceneMain extends Phaser.Scene {
                 count++;
             })
         })
-
+        // Attention future people - do this for a dynamic group of sprites with collision
+        this.physics.add.collider(this.wallGroup, this.hero)
     }
 
     update() {
@@ -91,9 +92,5 @@ class SceneMain extends Phaser.Scene {
             this.hero.body.velocity.x *= Math.SQRT1_2
             this.hero.body.velocity.y *= Math.SQRT1_2
         }
-    }
-    
-    hitWall() {
-        console.log('boom');
     }
 }
