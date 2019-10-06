@@ -371,6 +371,10 @@ class SceneMain extends Phaser.Scene {
         this.lightTurningOn = null;
         this.lightTurningOff = null;
         this.lightTriggeringOff = null;
+
+        this.touchedLight = false;
+        this.pressingLightSwitch = false;
+        this.pressedLightSwitch = false;
     }
 
     nextLevel = () => {
