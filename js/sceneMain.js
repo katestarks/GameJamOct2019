@@ -184,13 +184,11 @@ class SceneMain extends Phaser.Scene {
             this.hero.anims.play('left', true);
         } else if (this.cursors.right.isDown){
             this.hero.anims.play('right', true);
-        } else {
-        }
+        } 
         if (this.cursors.up.isDown && !this.cursors.left.isDown && !this.cursors.right.isDown) {
             this.hero.anims.play('up', true);
         } else if (this.cursors.down.isDown && !this.cursors.left.isDown && !this.cursors.right.isDown){
             this.hero.anims.play('down', true);
-        } else {
         }
 
         if (!this.cursors.left.isDown && !this.cursors.right.isDown &&
