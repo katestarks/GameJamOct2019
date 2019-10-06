@@ -9,6 +9,7 @@ class SceneMain extends Phaser.Scene {
         this.load.image('door', 'images/door.png');
         this.load.image('light', 'images/light.png');
         this.load.image('wall', 'images/wall.png');
+        
 
     }
 
