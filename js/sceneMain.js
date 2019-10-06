@@ -5,10 +5,10 @@ class SceneMain extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('Hero', 'images/hero.png');
-        this.load.image('Door', 'images/door.png');
-        this.load.image('Light', 'images/light.png');
-        this.load.image('Wall', 'images/wall.png');
+        this.load.image('hero', 'images/hero.png');
+        this.load.image('door', 'images/door.png');
+        this.load.image('light', 'images/light.png');
+        this.load.image('wall', 'images/wall.png');
 
     }
 
