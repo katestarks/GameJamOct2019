@@ -38,6 +38,7 @@ class SceneMain extends Phaser.Scene {
 
         // placing sprites in the center of the screen
         this.door = this.physics.add.sprite(this.centerX, this.centerY, 'door');
+        this.door.setScale(0.25);
         this.light = this.physics.add.sprite(this.centerX, this.centerY, 'light');
 
         // placing hero in the center of the screen
@@ -145,10 +146,10 @@ class SceneMain extends Phaser.Scene {
         // Attention future people - do this for a dynamic group of sprites with collision
         this.physics.add.collider(this.wallGroup, this.hero)
 
-        // Lightswitch scale and initial alpha
+        // Lightswitch scale and initial alpha and depth
+        this.light.setDepth(10)
         this.light.setScale(0.2);
-        this.setLightToAlpha(this.distanceFromHero(this.light), 250)
-
+        this.light.alpha = 0;
 
         this.physics.add.overlap(this.hero, this.light, () => this.turnOnLight(), null, this);
         this.pressedLightSwitch = false
