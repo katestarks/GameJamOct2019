@@ -9,13 +9,18 @@ window.onload = () => {
         physics: {
             default: 'arcade',
             arcade: {
-                gravity: {y: 0},
                 debug: true
             }
         },
         parent: 'phaser-game',
+        physics: {
+            default: 'arcade',
+            arcade: {
+                debug: true
+            }
+        },
         scene: [SceneMain]
-    };
+    }
 
     game = new Phaser.Game(config);
 
