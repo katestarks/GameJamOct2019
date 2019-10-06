@@ -11,3 +11,7 @@ The file `index.html` accesses the javascript and css files from this GitHub rep
 If a change is made that requires uploading to itch.io (such as modifying `index.html`), create a zip file containing all the relevant files and folders and upload it.
 
 When testing changes locally, you will need to modify `index.html` to use the local files, otherwise any changes you make to javascript or css will have no effect.
+
+## Images
+
+Use .png versions of images. .svg files are provided in case modification is needed. To use the .svgs you would need to change the config from phaser.AUTO to phaser.CANVAS. Beware that this could break everything.

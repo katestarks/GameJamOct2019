@@ -4,8 +4,10 @@ class SceneMain extends Phaser.Scene {
     }
     preload() {
 
-        this.load.spritesheet('hero', 'images/heroSheet.png');
-        this.load.image('lightbulb', 'images/lightbulb.png')
+        this.load.spritesheet('hero', 'images/heroSheet.png', {
+            frameWidth: 627, frameHeight: 625
+        });
+        this.load.image('lightbulb', 'images/lightbulb.png');
     }
 
     create() {
@@ -25,40 +27,42 @@ class SceneMain extends Phaser.Scene {
 
         // placing hero in the center of the screen
         this.hero = this.physics.add.sprite(this.centerX, this.centerY, 'hero');
+        this.hero.setScale(0.1)
 
         // collider between hero and edge of the scene
         this.hero.body.collideWorldBounds = true;
 
+        // add animation to hero movement
         this.anims.create({
             key: 'left',
             frames: this.anims.generateFrameNumbers('hero', { start: 3, end: 4 }),
-            frameRate: 10,
+            frameRate: 7,
             repeat: -1
         });
 
         this.anims.create({
             key: 'right',
             frames: this.anims.generateFrameNumbers('hero', { start: 1, end: 2 }),
-            frameRate: 10,
+            frameRate: 7,
             repeat: -1
         });
 
         this.anims.create({
             key: 'up',
             frames: this.anims.generateFrameNumbers('hero', { start: 7, end: 8 }),
-            frameRate: 10,
+            frameRate: 7,
             repeat: -1
         });
 
         this.anims.create({
             key: 'down',
             frames: this.anims.generateFrameNumbers('hero', { start: 5, end: 6 }),
-            frameRate: 10,
+            frameRate: 7,
             repeat: -1
         });
 
         this.anims.create({
-            key: 'turn',
+            key: 'stop',
             frames: [ { key: 'hero', frame: 0 } ],
             frameRate: 20
         });
@@ -76,17 +80,26 @@ class SceneMain extends Phaser.Scene {
         // let the hero moves (stop if key in not pushed)
         if (this.cursors.left.isDown && !this.cursors.right.isDown) {
             this.hero.setVelocityX(-160);
+            this.hero.anims.play('left', true); 
         } else if (!this.cursors.left.isDown && this.cursors.right.isDown){
             this.hero.setVelocityX(160);
+            this.hero.anims.play('right', true); 
         } else {
             this.hero.setVelocityX(0);
         }
         if (this.cursors.up.isDown && !this.cursors.down.isDown) {
             this.hero.setVelocityY(-160);
+            this.hero.anims.play('up', true); 
         } else if (!this.cursors.up.isDown && this.cursors.down.isDown){
             this.hero.setVelocityY(160);
+            this.hero.anims.play('down', true); 
         } else {
             this.hero.setVelocityY(0);
+        }
+
+        if (!this.cursors.left.isDown && !this.cursors.right.isDown && 
+            !this.cursors.up.isDown && !this.cursors.down.isDown){
+            this.hero.anims.play('stop', true);
         }
 
         // If moving diagonally, limit the speed to the same as if you were moving along only one axis
