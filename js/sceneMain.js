@@ -19,6 +19,8 @@ class SceneMain extends Phaser.Scene {
 
         // Sound effects
         this.load.audio('lightSwitch', 'sound_effects/light_switch.mp3')
+        this.load.audio('backgroundMusic', 'sounds/background.mp3');
+        this.load.audio('lightOnMusic', 'sounds/happy_music.mp3');
 
     }
 
@@ -154,6 +156,12 @@ class SceneMain extends Phaser.Scene {
         this.pressedLightSwitch = false
 
         this.lightSwitchSound = this.sound.add('lightSwitch')
+
+        this.backgroundMusic = this.sound.add('backgroundMusic', {loop: true, volume: 0.5});
+        this.backgroundMusic.play();
+
+        this.lightOnMusic = this.sound.add('lightOnMusic', {loop: true, volume: 0});
+        
     }
 
     update() {
@@ -220,7 +228,10 @@ class SceneMain extends Phaser.Scene {
     turnOnLight(options = {}) {
         this.pressingLightSwitch = true
         if (!this.pressedLightSwitch) {
-            this.lightSwitchSound.play()
+            this.lightSwitchSound.play();
+            this.backgroundMusic.volume = 0;
+            this.lightOnMusic.volume = 0.8;
+            this.lightOnMusic.play();
             this.tweens.add({
                 targets: this.spotlight,
                 alpha: 1,
@@ -246,6 +257,18 @@ class SceneMain extends Phaser.Scene {
                     this.pressedLightSwitch = false
                     this.lightSwitchSound.play()
                 }
+            });
+            this.tweens.add({
+                targets: this.lightOnMusic,
+                volume: 0,
+                duration: onDuration,
+                ease: 'Quart.easeIn'
+            });
+            this.tweens.add({
+                targets: this.backgroundMusic,
+                volume: 0.8,
+                duration: onDuration,
+                ease: 'Quart.easeIn'
             })
         }
     }
