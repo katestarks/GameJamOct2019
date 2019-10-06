@@ -148,7 +148,7 @@ class SceneMain extends Phaser.Scene {
             this.foreground.mask.bitmapMask.y = this.hero.y
             if (this.pressedLightSwitch && distance > 85) {
                 this.pressingLightSwitch = false
-                this.turnOffLight({onDuration: 10000})
+                this.turnOffLight({onDuration: 5000})
             }
         }
     }
