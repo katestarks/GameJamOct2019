@@ -162,6 +162,7 @@ class SceneMain extends Phaser.Scene {
         this.backgroundMusic.play();
 
         this.lightOnMusic = this.sound.add('lightOnMusic', {loop: true, volume: 0});
+        this.lightOnMusic.play()
         
     }
 
@@ -245,7 +246,6 @@ class SceneMain extends Phaser.Scene {
             this.lightSwitchSound.play();
             this.backgroundMusic.volume = 0;
             this.lightOnMusic.volume = 0.8;
-            this.lightOnMusic.play();
             this.tweens.add({
                 targets: this.spotlight,
                 alpha: 1,
