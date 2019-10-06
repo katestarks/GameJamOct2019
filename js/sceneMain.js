@@ -26,26 +26,7 @@ class SceneMain extends Phaser.Scene {
 
     create() {
         this.levelCounter = 0;
-        var background = this.add.image(0, 0, 'background')
-        background.scaleX = this.game.config.width / background.scaleX 
-        background.scaleY = this.game.config.height / background.scaleY 
-
-        // vars to set obj in the center of the game screen
-        this.centerX = this.game.config.width/2;
-        this.centerY = this.game.config.height/2;
-
-
-        // generate keyboard keys
-        this.cursors = this.input.keyboard.createCursorKeys();
-
-
-        // create grid on the game scene
-        this.gridConfig = {rows: 10, cols: 10, scene: this};
-        this.alignGrid = new AlignGrid(this.gridConfig);
-
-        // let the grid visible with index number
-        this.alignGrid.show();
-        this.alignGrid.showNumbers();
+        
         
         this.buildMap(levels, this.levelCounter);
 
@@ -178,8 +159,28 @@ class SceneMain extends Phaser.Scene {
     }
 
     buildMap = (levels, levelCounter) => {
+
+        var background = this.add.image(0, 0, 'background')
+        background.scaleX = this.game.config.width / background.scaleX 
+        background.scaleY = this.game.config.height / background.scaleY 
+
+        // vars to set obj in the center of the game screen
+        this.centerX = this.game.config.width/2;
+        this.centerY = this.game.config.height/2;
+
+
+        // generate keyboard keys
+        this.cursors = this.input.keyboard.createCursorKeys();
+
+
+        // create grid on the game scene
+        this.gridConfig = {rows: 10, cols: 10, scene: this};
+        this.alignGrid = new AlignGrid(this.gridConfig);
+
+        // let the grid visible with index number
         this.alignGrid.show();
         this.alignGrid.showNumbers();
+
         this.touchedLight = false;
         // Attention future people - do this for a dynamic group of sprites with collision
         this.wallGroup  = this.physics.add.group();
