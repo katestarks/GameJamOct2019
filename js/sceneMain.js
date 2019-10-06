@@ -186,6 +186,7 @@ class SceneMain extends Phaser.Scene {
         
                 // placing sprites in the center of the screen
                 this.door = this.physics.add.sprite(this.centerX, this.centerY, 'door');
+                this.door.setScale(0.25);
                 this.light = this.physics.add.sprite(this.centerX, this.centerY, 'light');
         
                 // placing hero in the center of the screen
