@@ -1,5 +1,6 @@
 var game;
-window.onload = function () {
+
+window.onload = () => {
 
     var config = {
         type: Phaser.AUTO,
@@ -22,6 +23,6 @@ window.onload = function () {
     };
 
 
-    var game = new Phaser.Game(config);
+    game = new Phaser.Game(config);
 
 }
