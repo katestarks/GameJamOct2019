@@ -146,9 +146,9 @@ class SceneMain extends Phaser.Scene {
             this.setLightToAlpha(distance, 200)
             this.foreground.mask.bitmapMask.x = this.hero.x
             this.foreground.mask.bitmapMask.y = this.hero.y
-            if (this.pressedLightSwitch && distance > 65) {
-                // this.pressedLightSwitch = false
-                this.turnOffLight({onDuration: 10000})
+            if (this.pressedLightSwitch && distance > 85) {
+                this.pressingLightSwitch = false
+                this.turnOffLight({onDuration: 5000})
             }
         }
     }
@@ -170,10 +170,7 @@ class SceneMain extends Phaser.Scene {
     }
 
     turnOnLight(options = {}) {
-        let onDuration = 10000
-        if ('onDuration' in options) {
-            onDuration = options.onDuration
-        }
+        this.pressingLightSwitch = true
         if (!this.pressedLightSwitch) {
             this.lightSwitchSound.play()
             this.tweens.add({
