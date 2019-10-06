@@ -27,29 +27,6 @@ class SceneMain extends Phaser.Scene {
         this.centerX = this.game.config.width/2;
         this.centerY = this.game.config.height/2;
 
-        // placing hero in the center of the screen
-        this.hero = this.physics.add.sprite(this.centerX, this.centerY, 'hero');
-
-        //CREATE ALL ASSETS ABOVE THIS LINE
-
-        // Darkness rectangle
-        this.foreground = this.add.image(0, 0, 'foreground')
-        this.foreground.scaleX = this.game.config.width / this.foreground.scaleX
-        this.foreground.scaleY = this.game.config.height / this.foreground.scaleY
-        
-        this.spotlight = this.make.sprite({
-            x: 300,
-            y: 300,
-            key: 'mask',
-            add: false
-        });
-        this.spotlight.alpha = 0
-
-        this.foreground.mask = new Phaser.Display.Masks.BitmapMask(this, this.spotlight)
-        this.foreground.mask.invertAlpha = true
-        this.foreground.mask.bitmapMask.scale = 3
-
-
         // placing sprites in the center of the screen
         this.hero = this.physics.add.sprite(this.centerX, this.centerY, 'hero');
         this.door = this.physics.add.sprite(this.centerX, this.centerY, 'door');
@@ -102,6 +79,26 @@ class SceneMain extends Phaser.Scene {
                 count++;
             })
         })
+
+        //CREATE ALL ASSETS ABOVE THIS LINE
+
+        // Darkness rectangle
+        this.foreground = this.add.image(0, 0, 'foreground')
+        this.foreground.scaleX = this.game.config.width / this.foreground.scaleX
+        this.foreground.scaleY = this.game.config.height / this.foreground.scaleY
+        
+        this.spotlight = this.make.sprite({
+            x: 300,
+            y: 300,
+            key: 'mask',
+            add: false
+        });
+        this.spotlight.alpha = 0
+
+        this.foreground.mask = new Phaser.Display.Masks.BitmapMask(this, this.spotlight)
+        this.foreground.mask.invertAlpha = true
+        this.foreground.mask.bitmapMask.scale = 3
+
         // Attention future people - do this for a dynamic group of sprites with collision
         this.physics.add.collider(this.wallGroup, this.hero)
 
@@ -113,7 +110,7 @@ class SceneMain extends Phaser.Scene {
         this.setLightToAlpha(this.distanceFromHero(this.lightswitch), 200)
 
 
-        this.physics.add.overlap(this.hero, this.lightswitch, () => this.turnOnLight({onDuration: 7000}), null, this);
+        this.physics.add.overlap(this.hero, this.lightswitch, () => this.turnOnLight(), null, this);
         this.pressedLightSwitch = false
 
         this.lightSwitchSound = this.sound.add('lightSwitch')
@@ -150,7 +147,7 @@ class SceneMain extends Phaser.Scene {
             this.foreground.mask.bitmapMask.y = this.hero.y
             if (this.pressedLightSwitch && distance > 65) {
                 // this.pressedLightSwitch = false
-                this.turnOffLight({onDuration: 1000})
+                this.turnOffLight({onDuration: 10000})
             }
         }
     }
@@ -171,7 +168,7 @@ class SceneMain extends Phaser.Scene {
         this.lightswitch.alpha = alpha
     }
 
-    turnOnLight(options) {
+    turnOnLight(options = {}) {
         let onDuration = 10000
         if ('onDuration' in options) {
             onDuration = options.onDuration
@@ -188,7 +185,7 @@ class SceneMain extends Phaser.Scene {
         }
     }
 
-    turnOffLight(options) {
+    turnOffLight(options = {}) {
         let onDuration = 10000
         if ('onDuration' in options) {
             onDuration = options.onDuration
