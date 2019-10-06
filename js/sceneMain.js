@@ -30,22 +30,18 @@ class SceneMain extends Phaser.Scene {
         this.centerX = this.game.config.width/2;
         this.centerY = this.game.config.height/2;
 
-        // placing light 'switch' on screen
-        // this.lightswitch = this.physics.add.sprite(50, 50, 'light');
-
         // Attention future people - do this for a dynamic group of sprites with collision
         this.wallGroup  = this.physics.add.group();
         this.wallGroup.enableBody = true;
         this.wallGroup.physicsBodyType = Phaser.Physics.ARCADE;
 
+        // placing sprites in the center of the screen
+        this.door = this.physics.add.sprite(this.centerX, this.centerY, 'door');
+        this.light = this.physics.add.sprite(this.centerX, this.centerY, 'light');
 
         // placing hero in the center of the screen
         this.hero = this.physics.add.sprite(this.centerX, this.centerY, 'hero');
         this.hero.setScale(0.1)
-
-        // placing sprites in the center of the screen
-        this.door = this.physics.add.sprite(this.centerX, this.centerY, 'door');
-        this.light = this.physics.add.sprite(this.centerX, this.centerY, 'light');
 
         // collider between hero and edge of the scene
         this.hero.body.collideWorldBounds = true;
@@ -108,6 +104,7 @@ class SceneMain extends Phaser.Scene {
                     case 'w':
                             // Attention future people - do this for a dynamic group of sprites with collision
                             wall = this.wallGroup.create(this.centerX, this.centerY, 'wall');
+                            wall.setScale(0.25)
                             wall.body.immovable = true;
                             this.alignGrid.placeAtIndex(count, wall);
                         break;
