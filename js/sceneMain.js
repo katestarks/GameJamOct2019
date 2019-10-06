@@ -1,4 +1,5 @@
 class SceneMain extends Phaser.Scene {
+    
     constructor() {
         super('SceneMain');
     }
@@ -9,14 +10,15 @@ class SceneMain extends Phaser.Scene {
         this.load.image('background', 'images/background.png')
         this.load.image('foreground', 'images/black_layer.png')
         this.load.image('mask', 'images/light-mask.png')
+		this.load.image('door', 'images/door.png');
+        this.load.image('light', 'images/light.png');
+        this.load.image('wall', 'images/wall.png');
 
         // Sound effects
         this.load.audio('lightSwitch', 'sound_effects/light_switch.mp3')
     }
+
     create() {
-
-        console.log(this)
-
         var background = this.add.image(0, 0, 'background')
         background.scaleX = this.game.config.width / background.scaleX 
         background.scaleY = this.game.config.height / background.scaleY 
@@ -48,11 +50,60 @@ class SceneMain extends Phaser.Scene {
         this.foreground.mask.bitmapMask.scale = 3
 
 
+        // placing sprites in the center of the screen
+        this.hero = this.physics.add.sprite(this.centerX, this.centerY, 'hero');
+        this.door = this.physics.add.sprite(this.centerX, this.centerY, 'door');
+        this.light = this.physics.add.sprite(this.centerX, this.centerY, 'light');
+
+        // Attention future people - do this for a dynamic group of sprites with collision
+        this.wallGroup  = this.physics.add.group();
+        this.wallGroup.enableBody = true;
+        this.wallGroup.physicsBodyType = Phaser.Physics.ARCADE;
+
         // collider between hero and edge of the scene
         this.hero.body.collideWorldBounds = true;
 
         // generate keyboard keys
         this.cursors = this.input.keyboard.createCursorKeys();
+
+
+        // create grid on the game scene
+        this.gridConfig = {rows: 10, cols: 10, scene: this};
+        this.alignGrid = new AlignGrid(this.gridConfig);
+
+        // let the grid visible with index number
+        this.alignGrid.show();
+        this.alignGrid.showNumbers();
+
+        // generate game screen from bi-dimensional array on sceneMap
+        let count = 0;
+        let wall;
+        levels.levelTwo.forEach(row => {
+            row.forEach(position => {
+                switch(position) {
+                    case 'f':
+                        break;
+                    case 'w':
+                            // Attention future people - do this for a dynamic group of sprites with collision
+                            wall = this.wallGroup.create(this.centerX, this.centerY, 'wall');
+                            wall.body.immovable = true;
+                            this.alignGrid.placeAtIndex(count, wall);
+                        break;
+                    case 'd':
+                        this.alignGrid.placeAtIndex(count, this.door);
+                        break;
+                    case 't':
+                        this.alignGrid.placeAtIndex(count, this.light);
+                        break;
+                    case 'h':
+                        this.alignGrid.placeAtIndex(count, this.hero);
+                        break;
+                }
+                count++;
+            })
+        })
+        // Attention future people - do this for a dynamic group of sprites with collision
+        this.physics.add.collider(this.wallGroup, this.hero)
 
         // placing light 'switch' on screen
         this.lightswitch = this.physics.add.sprite(50, 50, 'star');
@@ -60,6 +111,7 @@ class SceneMain extends Phaser.Scene {
         // Lightswitch scale and initial alpha
         this.lightswitch.setScale(2);
         this.setLightToAlpha(this.distanceFromHero(this.lightswitch), 200)
+
 
         this.physics.add.overlap(this.hero, this.lightswitch, () => this.turnOnLight({onDuration: 7000}), null, this);
         this.pressedLightSwitch = false
