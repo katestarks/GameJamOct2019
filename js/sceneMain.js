@@ -215,6 +215,7 @@ class SceneMain extends Phaser.Scene {
             alpha = 0
         }
         this.light.alpha = alpha
+        console.log(this.light)
     }
 
     turnOnLight(options = {}) {
