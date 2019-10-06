@@ -146,9 +146,11 @@ class SceneMain extends Phaser.Scene {
         // Attention future people - do this for a dynamic group of sprites with collision
         this.physics.add.collider(this.wallGroup, this.hero)
 
-        // Lightswitch scale and initial alpha
+        // Lightswitch scale and initial alpha and depth
+        this.light.setDepth(10)
         this.light.setScale(0.2);
-        this.setLightToAlpha(this.distanceFromHero(this.light), 250)
+        this.light.alpha = 0;
+        // this.setLightToAlpha(this.distanceFromHero(this.light), 250)
 
 
         this.physics.add.overlap(this.hero, this.light, () => this.turnOnLight(), null, this);
