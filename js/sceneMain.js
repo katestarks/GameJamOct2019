@@ -40,6 +40,7 @@ class SceneMain extends Phaser.Scene {
 
         // placing sprites in the center of the screen
         this.door = this.physics.add.sprite(this.centerX, this.centerY, 'door');
+        this.door.setScale(0.25);
         this.light = this.physics.add.sprite(this.centerX, this.centerY, 'light');
 
         // placing hero in the center of the screen
@@ -147,10 +148,10 @@ class SceneMain extends Phaser.Scene {
         // Attention future people - do this for a dynamic group of sprites with collision
         this.physics.add.collider(this.wallGroup, this.hero)
 
-        // Lightswitch scale and initial alpha
+        // Lightswitch scale and initial alpha and depth
+        this.light.setDepth(10)
         this.light.setScale(0.2);
-        this.setLightToAlpha(this.distanceFromHero(this.light), 250)
-
+        this.light.alpha = 0;
 
         this.physics.add.overlap(this.hero, this.light, () => this.turnOnLight(), null, this);
         this.pressedLightSwitch = false
@@ -165,27 +166,40 @@ class SceneMain extends Phaser.Scene {
     }
 
     update() {
-        // let the hero moves (stop if key in not pushed)
+        // Moving the character on key press or setting velocity to 0 if no press.
         if (this.cursors.left.isDown && !this.cursors.right.isDown) {
             this.hero.setVelocityX(-160);
-            this.hero.anims.play('left', true); 
         } else if (!this.cursors.left.isDown && this.cursors.right.isDown){
             this.hero.setVelocityX(160);
-            this.hero.anims.play('right', true); 
         } else {
             this.hero.setVelocityX(0);
         }
         if (this.cursors.up.isDown && !this.cursors.down.isDown) {
             this.hero.setVelocityY(-160);
-            this.hero.anims.play('up', true); 
         } else if (!this.cursors.up.isDown && this.cursors.down.isDown){
             this.hero.setVelocityY(160);
-            this.hero.anims.play('down', true); 
         } else {
             this.hero.setVelocityY(0);
         }
 
         if (!this.cursors.left.isDown && !this.cursors.right.isDown && 
+            !this.cursors.up.isDown && !this.cursors.down.isDown){
+            this.hero.anims.play('stop', true);
+        }
+
+        //Applying animations to key presses
+        if (this.cursors.left.isDown ) {
+            this.hero.anims.play('left', true);
+        } else if (this.cursors.right.isDown){
+            this.hero.anims.play('right', true);
+        } 
+        if (this.cursors.up.isDown && !this.cursors.left.isDown && !this.cursors.right.isDown) {
+            this.hero.anims.play('up', true);
+        } else if (this.cursors.down.isDown && !this.cursors.left.isDown && !this.cursors.right.isDown){
+            this.hero.anims.play('down', true);
+        }
+
+        if (!this.cursors.left.isDown && !this.cursors.right.isDown &&
             !this.cursors.up.isDown && !this.cursors.down.isDown){
             this.hero.anims.play('stop', true);
         }
