@@ -3,12 +3,15 @@ class SceneMain extends Phaser.Scene {
         super('SceneMain');
     }
     preload() {
-
+        // Images
         this.load.image('hero', 'images/hero.png');
         this.load.image('star', 'images/star.png')
         this.load.image('background', 'images/background.png')
         this.load.image('foreground', 'images/black_layer.png')
         this.load.image('mask', 'images/light-mask.png')
+
+        // Sound effects
+        this.load.audio('lightSwitch', 'sound_effects/light_switch.mp3')
     }
     create() {
 
@@ -43,7 +46,6 @@ class SceneMain extends Phaser.Scene {
         this.foreground.mask = new Phaser.Display.Masks.BitmapMask(this, this.spotlight)
         this.foreground.mask.invertAlpha = true
         this.foreground.mask.bitmapMask.scale = 3
-        console.log(this.foreground.mask)
 
 
         // collider between hero and edge of the scene
@@ -57,10 +59,12 @@ class SceneMain extends Phaser.Scene {
 
         // Lightswitch scale and initial alpha
         this.lightswitch.setScale(2);
-        this.setLightToAlpha(this.distanceFromHero(this.lightswitch), 250)
+        this.setLightToAlpha(this.distanceFromHero(this.lightswitch), 200)
 
-        this.physics.add.overlap(this.hero, this.lightswitch, this.turnOnLight, null, this);
+        this.physics.add.overlap(this.hero, this.lightswitch, () => this.turnOnLight({onDuration: 7000}), null, this);
         this.pressedLightSwitch = false
+
+        this.lightSwitchSound = this.sound.add('lightSwitch')
     }
 
     update() {
@@ -88,9 +92,14 @@ class SceneMain extends Phaser.Scene {
 
         // If hero is moving in any direction
         if (this.hero.body.velocity.x || this.hero.body.velocity.y) {
-            this.setLightToAlpha(this.distanceFromHero(this.lightswitch), 250)
+            let distance = this.distanceFromHero(this.lightswitch)
+            this.setLightToAlpha(distance, 200)
             this.foreground.mask.bitmapMask.x = this.hero.x
             this.foreground.mask.bitmapMask.y = this.hero.y
+            if (this.pressedLightSwitch && distance > 65) {
+                // this.pressedLightSwitch = false
+                this.turnOffLight({onDuration: 1000})
+            }
         }
     }
 
@@ -99,7 +108,7 @@ class SceneMain extends Phaser.Scene {
         let xCoord = Math.abs(el.body.x - this.hero.body.x)
         let yCoord = Math.abs(el.body.y - this.hero.body.y)
 
-        return xCoord + yCoord
+        return Math.sqrt(xCoord**2 + yCoord**2)
     }
 
     setLightToAlpha(distance, scale) {
@@ -110,38 +119,39 @@ class SceneMain extends Phaser.Scene {
         this.lightswitch.alpha = alpha
     }
 
-    turnOnLight() {
+    turnOnLight(options) {
+        let onDuration = 10000
+        if ('onDuration' in options) {
+            onDuration = options.onDuration
+        }
         if (!this.pressedLightSwitch) {
+            this.lightSwitchSound.play()
             this.tweens.add({
                 targets: this.spotlight,
                 alpha: 1,
-                duration: 2000,
-                ease: 'Sine.easeIn',
-                onComplete: () => {this.tweens.add({
-                    targets: this.spotlight,
-                    alpha: 0,
-                    duration: 10000,
-                    ease: 'Sine.easeIn',
-                    onComplete: () => this.pressedLightSwitch = false
-                })}
+                duration: 500,
+                ease: 'Sine.easeIn'
             });
             this.pressedLightSwitch = true
         }
-        // The above sort of works, but I would rather the spotlight get bigger, than brighter
-        // if (!this.pressedLightSwitch) {
-        //     this.tweens.add({
-        //         targets: this.foreground.mask.bitmapMask,
-        //         scale: 1,
-        //         duration: 2000,
-        //         ease: 'Sine.easeIn',
-        //         onComplete: () => {this.tweens.add({
-        //             targets: this.foreground.mask.bitmapMask,
-        //             scale: 0,
-        //             duration: 10000,
-        //             ease: 'Sine.easeIn',
-        //         })}
-        //     });
-        //     this.pressedLightSwitch = true
-        // }
+    }
+
+    turnOffLight(options) {
+        let onDuration = 10000
+        if ('onDuration' in options) {
+            onDuration = options.onDuration
+        }
+        if (!this.pressingLightSwitch) {
+            this.tweens.add({
+                targets: this.spotlight,
+                alpha: 0,
+                duration: onDuration,
+                ease: 'Quart.easeIn',
+                onComplete: () => {
+                    this.pressedLightSwitch = false
+                    this.lightSwitchSound.play()
+                }
+            })
+        }
     }
 }
