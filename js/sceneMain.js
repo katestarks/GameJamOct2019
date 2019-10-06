@@ -6,6 +6,10 @@ class SceneMain extends Phaser.Scene {
 
         this.load.image('hero', 'images/hero.png');
         this.load.image('star', 'images/star.png')
+        this.load.audio('background', 'sound/background.mp3')
+        this.load.audio('fall', 'sound/cartoon_fall.mp3')
+        this.load.audio('door', 'sound/door_open.mp3')
+        this.load.audio('switch', 'sound/light_switch.mp3')
     }
     create() {
 
