@@ -20,6 +20,8 @@ class SceneMain extends Phaser.Scene {
         
         // Sound effects
         this.load.audio('lightSwitch', 'sound_effects/light_switch.mp3')
+        this.load.audio('backgroundMusic', 'sounds/background.mp3');
+        this.load.audio('lightOnMusic', 'sounds/happy_music.mp3');
     }
 
     create() {
@@ -38,6 +40,7 @@ class SceneMain extends Phaser.Scene {
 
         // placing sprites in the center of the screen
         this.door = this.physics.add.sprite(this.centerX, this.centerY, 'door');
+        this.door.setScale(0.25);
         this.light = this.physics.add.sprite(this.centerX, this.centerY, 'light');
 
         // placing hero in the center of the screen
@@ -166,10 +169,10 @@ class SceneMain extends Phaser.Scene {
         // Attention future people - do this for a dynamic group of sprites with collision
         this.physics.add.collider(this.wallGroup, this.hero)
 
-        // Lightswitch scale and initial alpha
+        // Lightswitch scale and initial alpha and depth
+        this.light.setDepth(10)
         this.light.setScale(0.2);
-        this.setLightToAlpha(this.distanceFromHero(this.light), 250)
-
+        this.light.alpha = 0;
 
         this.physics.add.overlap(this.hero, this.light, () => this.turnOnLight(), null, this);
         this.pressedLightSwitch = false
@@ -179,30 +182,49 @@ class SceneMain extends Phaser.Scene {
         this.lightTurningOn = null;
         this.lightTurningOff = null;
         this.lightTriggeringOff = null;
+
+        this.backgroundMusic = this.sound.add('backgroundMusic', {loop: true, volume: 0.5});
+        this.backgroundMusic.play();
+
+        this.lightOnMusic = this.sound.add('lightOnMusic', {loop: true, volume: 0});
+        this.lightOnMusic.play()
     }
 
     update() {
-        // let the hero moves (stop if key in not pushed)
+        // Moving the character on key press or setting velocity to 0 if no press.
         if (this.cursors.left.isDown && !this.cursors.right.isDown) {
             this.hero.setVelocityX(-160);
-            this.hero.anims.play('left', true); 
         } else if (!this.cursors.left.isDown && this.cursors.right.isDown){
             this.hero.setVelocityX(160);
-            this.hero.anims.play('right', true); 
         } else {
             this.hero.setVelocityX(0);
         }
         if (this.cursors.up.isDown && !this.cursors.down.isDown) {
             this.hero.setVelocityY(-160);
-            this.hero.anims.play('up', true); 
         } else if (!this.cursors.up.isDown && this.cursors.down.isDown){
             this.hero.setVelocityY(160);
-            this.hero.anims.play('down', true); 
         } else {
             this.hero.setVelocityY(0);
         }
 
         if (!this.cursors.left.isDown && !this.cursors.right.isDown && 
+            !this.cursors.up.isDown && !this.cursors.down.isDown){
+            this.hero.anims.play('stop', true);
+        }
+
+        //Applying animations to key presses
+        if (this.cursors.left.isDown ) {
+            this.hero.anims.play('left', true);
+        } else if (this.cursors.right.isDown){
+            this.hero.anims.play('right', true);
+        } 
+        if (this.cursors.up.isDown && !this.cursors.left.isDown && !this.cursors.right.isDown) {
+            this.hero.anims.play('up', true);
+        } else if (this.cursors.down.isDown && !this.cursors.left.isDown && !this.cursors.right.isDown){
+            this.hero.anims.play('down', true);
+        }
+
+        if (!this.cursors.left.isDown && !this.cursors.right.isDown &&
             !this.cursors.up.isDown && !this.cursors.down.isDown){
             this.hero.anims.play('stop', true);
         }
@@ -248,7 +270,9 @@ class SceneMain extends Phaser.Scene {
         this.pressingLightSwitch = true
         if (!this.pressedLightSwitch) {
             this.cancelLightAnimations()
-            this.lightSwitchSound.play()
+            this.lightSwitchSound.play();
+            this.backgroundMusic.volume = 0;
+            this.lightOnMusic.volume = 0.8;
             this.lightTurningOn = this.tweens.add({
                 targets: this.spotlight,
                 alpha: 1,
@@ -264,7 +288,6 @@ class SceneMain extends Phaser.Scene {
         if ('onDuration' in options) {
             onDuration = options.onDuration
         }
-        console.log(onDuration)
         if (!this.pressingLightSwitch && !this.lightTriggeringOff) {
             if (this.lightTurningOff && !this.lightTriggeringOff) {
                 this.cancelLightAnimations()
@@ -279,6 +302,18 @@ class SceneMain extends Phaser.Scene {
                         this.lightSwitchSound.play()
                     }
                 })
+                this.tweens.add({
+                    targets: this.lightOnMusic,
+                    volume: 0,
+                    duration: onDuration,
+                    ease: 'Quart.easeIn'
+                });
+                this.tweens.add({
+                    targets: this.backgroundMusic,
+                    volume: 0.8,
+                    duration: onDuration,
+                    ease: 'Quart.easeIn'
+                })
             } else {
                 this.cancelLightAnimations()
                 this.lightTurningOff = this.tweens.add({
@@ -292,10 +327,22 @@ class SceneMain extends Phaser.Scene {
                         this.lightSwitchSound.play()
                     }
                 })
+                this.tweens.add({
+                    targets: this.lightOnMusic,
+                    volume: 0,
+                    duration: onDuration,
+                    ease: 'Quart.easeIn'
+                });
+                this.tweens.add({
+                    targets: this.backgroundMusic,
+                    volume: 0.8,
+                    duration: onDuration,
+                    ease: 'Quart.easeIn'
+                })
             }
         }
     }
-    
+
     cancelLightAnimations() {
         if (this.lightTurningOn) {
             this.lightTurningOn.stop();
