@@ -16,7 +16,7 @@ window.onload = () => {
         physics: {
             default: 'arcade',
             arcade: {
-                debug: true
+                debug: false
             }
         },
         scene: [SceneMain]
