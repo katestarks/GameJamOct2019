@@ -122,6 +122,7 @@ class SceneMain extends Phaser.Scene {
                     alpha: 0,
                     duration: 10000,
                     ease: 'Sine.easeIn',
+                    onComplete: () => this.pressedLightSwitch = false
                 })}
             });
             this.pressedLightSwitch = true
