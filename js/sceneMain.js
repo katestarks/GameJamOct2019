@@ -157,27 +157,42 @@ class SceneMain extends Phaser.Scene {
     }
 
     update() {
-        // let the hero moves (stop if key in not pushed)
+        // Moving the character on key press or setting velocity to 0 if no press.
         if (this.cursors.left.isDown && !this.cursors.right.isDown) {
             this.hero.setVelocityX(-160);
-            this.hero.anims.play('left', true); 
         } else if (!this.cursors.left.isDown && this.cursors.right.isDown){
             this.hero.setVelocityX(160);
-            this.hero.anims.play('right', true); 
         } else {
             this.hero.setVelocityX(0);
         }
         if (this.cursors.up.isDown && !this.cursors.down.isDown) {
             this.hero.setVelocityY(-160);
-            this.hero.anims.play('up', true); 
         } else if (!this.cursors.up.isDown && this.cursors.down.isDown){
             this.hero.setVelocityY(160);
-            this.hero.anims.play('down', true); 
         } else {
             this.hero.setVelocityY(0);
         }
 
         if (!this.cursors.left.isDown && !this.cursors.right.isDown && 
+            !this.cursors.up.isDown && !this.cursors.down.isDown){
+            this.hero.anims.play('stop', true);
+        }
+
+        //Applying animations to key presses
+        if (this.cursors.left.isDown ) {
+            this.hero.anims.play('left', true);
+        } else if (this.cursors.right.isDown){
+            this.hero.anims.play('right', true);
+        } else {
+        }
+        if (this.cursors.up.isDown && !this.cursors.left.isDown && !this.cursors.right.isDown) {
+            this.hero.anims.play('up', true);
+        } else if (this.cursors.down.isDown && !this.cursors.left.isDown && !this.cursors.right.isDown){
+            this.hero.anims.play('down', true);
+        } else {
+        }
+
+        if (!this.cursors.left.isDown && !this.cursors.right.isDown &&
             !this.cursors.up.isDown && !this.cursors.down.isDown){
             this.hero.anims.play('stop', true);
         }
