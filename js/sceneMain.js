@@ -178,58 +178,60 @@ class SceneMain extends Phaser.Scene {
     }
 
     buildMap = (levels, levelCounter) => {
-                this.touchedLight = false;
-                // Attention future people - do this for a dynamic group of sprites with collision
-                this.wallGroup  = this.physics.add.group();
-                this.wallGroup.enableBody = true;
-                this.wallGroup.physicsBodyType = Phaser.Physics.ARCADE;
-        
-                // placing sprites in the center of the screen
-                this.door = this.physics.add.sprite(this.centerX, this.centerY, 'door');
-                this.door.setScale(0.25);
-                this.light = this.physics.add.sprite(this.centerX, this.centerY, 'light');
-        
-                // placing hero in the center of the screen
-                this.hero = this.physics.add.sprite(this.centerX, this.centerY, 'hero');
-                this.hero.setScale(0.1)
-        
-                // collider between hero and edge of the scene
-                this.hero.body.collideWorldBounds = true;
-        
-                // add animation to hero movement
-                this.anims.create({
-                    key: 'left',
-                    frames: this.anims.generateFrameNumbers('hero', { start: 3, end: 4 }),
-                    frameRate: 7,
-                    repeat: -1
-                });
-        
-                this.anims.create({
-                    key: 'right',
-                    frames: this.anims.generateFrameNumbers('hero', { start: 1, end: 2 }),
-                    frameRate: 7,
-                    repeat: -1
-                });
-        
-                this.anims.create({
-                    key: 'up',
-                    frames: this.anims.generateFrameNumbers('hero', { start: 7, end: 8 }),
-                    frameRate: 7,
-                    repeat: -1
-                });
-        
-                this.anims.create({
-                    key: 'down',
-                    frames: this.anims.generateFrameNumbers('hero', { start: 5, end: 6 }),
-                    frameRate: 7,
-                    repeat: -1
-                });
-        
-                this.anims.create({
-                    key: 'stop',
-                    frames: [ { key: 'hero', frame: 0 } ],
-                    frameRate: 20
-                });
+        this.alignGrid.show();
+        this.alignGrid.showNumbers();
+        this.touchedLight = false;
+        // Attention future people - do this for a dynamic group of sprites with collision
+        this.wallGroup  = this.physics.add.group();
+        this.wallGroup.enableBody = true;
+        this.wallGroup.physicsBodyType = Phaser.Physics.ARCADE;
+
+        // placing sprites in the center of the screen
+        this.door = this.physics.add.sprite(this.centerX, this.centerY, 'door');
+        this.door.setScale(0.25);
+        this.light = this.physics.add.sprite(this.centerX, this.centerY, 'light');
+
+        // placing hero in the center of the screen
+        this.hero = this.physics.add.sprite(this.centerX, this.centerY, 'hero');
+        this.hero.setScale(0.1)
+
+        // collider between hero and edge of the scene
+        this.hero.body.collideWorldBounds = true;
+
+        // add animation to hero movement
+        this.anims.create({
+            key: 'left',
+            frames: this.anims.generateFrameNumbers('hero', { start: 3, end: 4 }),
+            frameRate: 7,
+            repeat: -1
+        });
+
+        this.anims.create({
+            key: 'right',
+            frames: this.anims.generateFrameNumbers('hero', { start: 1, end: 2 }),
+            frameRate: 7,
+            repeat: -1
+        });
+
+        this.anims.create({
+            key: 'up',
+            frames: this.anims.generateFrameNumbers('hero', { start: 7, end: 8 }),
+            frameRate: 7,
+            repeat: -1
+        });
+
+        this.anims.create({
+            key: 'down',
+            frames: this.anims.generateFrameNumbers('hero', { start: 5, end: 6 }),
+            frameRate: 7,
+            repeat: -1
+        });
+
+        this.anims.create({
+            key: 'stop',
+            frames: [ { key: 'hero', frame: 0 } ],
+            frameRate: 20
+        });
         
         // generate game screen from bi-dimensional array on sceneMap
         let count = 0;
