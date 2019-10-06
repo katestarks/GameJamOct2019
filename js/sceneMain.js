@@ -19,6 +19,8 @@ class SceneMain extends Phaser.Scene {
 
         // Sound effects
         this.load.audio('lightSwitch', 'sound_effects/light_switch.mp3')
+        this.load.audio('backgroundMusic', 'sounds/background.mp3');
+        this.load.audio('lightOnMusic', 'sounds/happy_music.mp3');
 
     }
 
@@ -33,7 +35,6 @@ class SceneMain extends Phaser.Scene {
         this.centerY = this.game.config.height/2;
 
 
-
         // generate keyboard keys
         this.cursors = this.input.keyboard.createCursorKeys();
 
@@ -46,36 +47,49 @@ class SceneMain extends Phaser.Scene {
         this.alignGrid.show();
         this.alignGrid.showNumbers();
         
-
         this.buildMap(levels, this.levelCounter);
 
         //CREATE ALL ASSETS ABOVE THIS LINE
 
 
+        
     }
 
     update() {
-        // let the hero moves (stop if key in not pushed)
+        // Moving the character on key press or setting velocity to 0 if no press.
         if (this.cursors.left.isDown && !this.cursors.right.isDown) {
             this.hero.setVelocityX(-160);
-            this.hero.anims.play('left', true); 
         } else if (!this.cursors.left.isDown && this.cursors.right.isDown){
             this.hero.setVelocityX(160);
-            this.hero.anims.play('right', true); 
         } else {
             this.hero.setVelocityX(0);
         }
         if (this.cursors.up.isDown && !this.cursors.down.isDown) {
             this.hero.setVelocityY(-160);
-            this.hero.anims.play('up', true); 
         } else if (!this.cursors.up.isDown && this.cursors.down.isDown){
             this.hero.setVelocityY(160);
-            this.hero.anims.play('down', true); 
         } else {
             this.hero.setVelocityY(0);
         }
 
         if (!this.cursors.left.isDown && !this.cursors.right.isDown && 
+            !this.cursors.up.isDown && !this.cursors.down.isDown){
+            this.hero.anims.play('stop', true);
+        }
+
+        //Applying animations to key presses
+        if (this.cursors.left.isDown ) {
+            this.hero.anims.play('left', true);
+        } else if (this.cursors.right.isDown){
+            this.hero.anims.play('right', true);
+        } 
+        if (this.cursors.up.isDown && !this.cursors.left.isDown && !this.cursors.right.isDown) {
+            this.hero.anims.play('up', true);
+        } else if (this.cursors.down.isDown && !this.cursors.left.isDown && !this.cursors.right.isDown){
+            this.hero.anims.play('down', true);
+        }
+
+        if (!this.cursors.left.isDown && !this.cursors.right.isDown &&
             !this.cursors.up.isDown && !this.cursors.down.isDown){
             this.hero.anims.play('stop', true);
         }
@@ -119,7 +133,9 @@ class SceneMain extends Phaser.Scene {
         this.touchedLight = true;
         this.pressingLightSwitch = true
         if (!this.pressedLightSwitch) {
-            this.lightSwitchSound.play()
+            this.lightSwitchSound.play();
+            this.backgroundMusic.volume = 0;
+            this.lightOnMusic.volume = 0.8;
             this.tweens.add({
                 targets: this.spotlight,
                 alpha: 1,
@@ -145,6 +161,18 @@ class SceneMain extends Phaser.Scene {
                     this.pressedLightSwitch = false
                     this.lightSwitchSound.play()
                 }
+            });
+            this.tweens.add({
+                targets: this.lightOnMusic,
+                volume: 0,
+                duration: onDuration,
+                ease: 'Quart.easeIn'
+            });
+            this.tweens.add({
+                targets: this.backgroundMusic,
+                volume: 0.8,
+                duration: onDuration,
+                ease: 'Quart.easeIn'
             })
         }
     }
@@ -256,12 +284,21 @@ class SceneMain extends Phaser.Scene {
         // Lightswitch scale and initial alpha
         this.light.setScale(0.2);
         this.setLightToAlpha(this.distanceFromHero(this.light), 250)
+        // Lightswitch scale and initial alpha and depth
+        this.light.setDepth(10)
+        this.light.alpha = 0;
 
 
         this.physics.add.overlap(this.hero, this.light, () => this.turnOnLight(), null, this);
         this.pressedLightSwitch = false
 
         this.lightSwitchSound = this.sound.add('lightSwitch')
+
+        this.backgroundMusic = this.sound.add('backgroundMusic', {loop: true, volume: 0.5});
+        this.backgroundMusic.play();
+
+        this.lightOnMusic = this.sound.add('lightOnMusic', {loop: true, volume: 0});
+        this.lightOnMusic.play()
     }
 
     nextLevel = () => {

@@ -13,7 +13,7 @@ class SceneTitle extends Phaser.Scene {
         // create and display grid
         this.alignGrid = new AlignGrid({rows: 11, cols: 11, scene: this});
 
-        // place the resized logo on the screen 
+        // place the resized logo
         var title = this.add.image(0, 0, 'logo');
         title.displayWidth = game.config.width * 0.9;
         this.alignGrid.placeAtIndex(49, title);
