@@ -231,11 +231,24 @@ class SceneMain extends Phaser.Scene {
         // placing sprites in the center of the screen
         this.door = this.physics.add.sprite(this.centerX, this.centerY, 'door');
         this.door.setScale(0.25);
+        this.door.setDepth(1)
         this.light = this.physics.add.sprite(this.centerX, this.centerY, 'light');
 
         // placing hero in the center of the screen
         this.hero = this.physics.add.sprite(this.centerX, this.centerY, 'hero');
         this.hero.setScale(0.1)
+        this.hero.setDepth(11)
+
+        // Standard floor tiles
+        this.floorGroup  = this.physics.add.group();
+
+        // Trigger floor tiles that will switch off the light
+        this.triggerFloorGroup  = this.physics.add.group();
+        this.triggerFloorGroup.enableBody = true;
+        this.triggerFloorGroup.physicsBodyType = Phaser.Physics.ARCADE;
+        this.physics.add.overlap(this.hero, this.triggerFloorGroup, () => {
+            this.turnOffLight({onDuration: 500})
+        });
 
         // collider between hero and edge of the scene
         this.hero.body.collideWorldBounds = true;
@@ -278,10 +291,19 @@ class SceneMain extends Phaser.Scene {
         // generate game screen from bi-dimensional array on sceneMap
         let count = 0;
         let wall;
+        let floor;
+        let trigger_floor;
         levels[levelCounter].forEach(row => {
             row.forEach(position => {
+                floor = this.floorGroup.create(this.centerX, this.centerY, 'floor').setScale(this.alignGrid.scaleToTileSize());
+                floor.body.immovable = true;
+                this.alignGrid.placeAtIndex(count, floor);
+
                 switch(position) {
-                    case 'f':
+                    case 't':
+                        trigger_floor = this.triggerFloorGroup.create(this.centerX, this.centerY, 'trigger_floor').setScale(this.alignGrid.scaleToTileSize());
+                        trigger_floor.body.immovable = true;
+                        this.alignGrid.placeAtIndex(count, trigger_floor);
                         break;
                     case 'w':
                             // Attention future people - do this for a dynamic group of sprites with collision
@@ -293,7 +315,7 @@ class SceneMain extends Phaser.Scene {
                     case 'd':
                         this.alignGrid.placeAtIndex(count, this.door);
                         break;
-                    case 't':
+                    case 'l':
                         this.alignGrid.placeAtIndex(count, this.light);
                         break;
                     case 'h':
@@ -308,6 +330,7 @@ class SceneMain extends Phaser.Scene {
         this.foreground = this.add.image(0, 0, 'foreground')
         this.foreground.scaleX = this.game.config.width / this.foreground.scaleX
         this.foreground.scaleY = this.game.config.height / this.foreground.scaleY
+        this.foreground.setDepth(5);
         
         this.spotlight = this.make.sprite({
             x: 300,
