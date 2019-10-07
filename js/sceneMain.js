@@ -236,7 +236,7 @@ class SceneMain extends Phaser.Scene {
 
         // placing hero in the center of the screen
         this.hero = this.physics.add.sprite(this.centerX, this.centerY, 'hero');
-        this.hero.setScale(0.1)
+        this.hero.setScale(0.07)
         this.hero.setDepth(11)
 
         // Standard floor tiles
