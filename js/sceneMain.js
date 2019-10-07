@@ -298,7 +298,6 @@ class SceneMain extends Phaser.Scene {
                 floor = this.floorGroup.create(this.centerX, this.centerY, 'floor').setScale(this.alignGrid.scaleToTileSize());
                 floor.body.immovable = true;
                 this.alignGrid.placeAtIndex(count, floor);
-
                 switch(position) {
                     case 't':
                         trigger_floor = this.triggerFloorGroup.create(this.centerX, this.centerY, 'trigger_floor').setScale(this.alignGrid.scaleToTileSize());
@@ -388,6 +387,8 @@ class SceneMain extends Phaser.Scene {
             this.light.destroy();
             this.door.destroy();
             this.foreground.destroy();
+            this.backgroundMusic.stop()
+            this.lightOnMusic.stop()
             this.buildMap(levels, this.levelCounter)
         }
     }
