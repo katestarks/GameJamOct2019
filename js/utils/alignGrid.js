@@ -79,4 +79,8 @@ class AlignGrid {
         }
     }
 
+    scaleToTileSize() {
+        return this.cw / 240;
+    }
+
 }

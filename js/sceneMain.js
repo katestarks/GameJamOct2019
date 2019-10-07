@@ -15,25 +15,19 @@ class SceneMain extends Phaser.Scene {
         this.load.image('mask', 'images/light-mask.png')
 		this.load.image('door', 'images/door.png');
         this.load.image('wall', 'images/wall.png');
+        this.load.image('floor', 'images/floor.png');
+        this.load.image('trigger_floor', 'images/trigger_floor.png');
         
-
         // Sound effects
         this.load.audio('lightSwitch', 'sound_effects/light_switch.mp3')
         this.load.audio('backgroundMusic', 'sounds/background.mp3');
         this.load.audio('lightOnMusic', 'sounds/happy_music.mp3');
-
     }
 
-    create() {
+    create() {        
         this.levelCounter = 0;
-        
-        
+                
         this.buildMap(levels, this.levelCounter);
-
-        //CREATE ALL ASSETS ABOVE THIS LINE
-
-
-        
     }
 
     update() {
@@ -81,16 +75,18 @@ class SceneMain extends Phaser.Scene {
             this.hero.body.velocity.y *= Math.SQRT1_2
         }
 
+        let distance = this.distanceFromHero(this.light)
+        if (this.pressedLightSwitch && this.lightTurningOff === null && distance > 85) {
+            this.pressedLightSwitch = false
+            this.pressingLightSwitch = false
+            this.turnOffLight({onDuration: 20000})
+        }
+
         // If hero is moving in any direction
         if (this.hero.body.velocity.x || this.hero.body.velocity.y) {
-            let distance = this.distanceFromHero(this.light)
             this.setLightToAlpha(distance, 200)
             this.foreground.mask.bitmapMask.x = this.hero.x
             this.foreground.mask.bitmapMask.y = this.hero.y
-            if (this.pressedLightSwitch && distance > 85) {
-                this.pressingLightSwitch = false
-                this.turnOffLight({onDuration: 5000})
-            }
         }
     }
 
@@ -114,10 +110,11 @@ class SceneMain extends Phaser.Scene {
         this.touchedLight = true;
         this.pressingLightSwitch = true
         if (!this.pressedLightSwitch) {
+            this.cancelLightAnimations()
             this.lightSwitchSound.play();
             this.backgroundMusic.volume = 0;
             this.lightOnMusic.volume = 0.8;
-            this.tweens.add({
+            this.lightTurningOn = this.tweens.add({
                 targets: this.spotlight,
                 alpha: 1,
                 duration: 500,
@@ -132,29 +129,73 @@ class SceneMain extends Phaser.Scene {
         if ('onDuration' in options) {
             onDuration = options.onDuration
         }
-        if (!this.pressingLightSwitch) {
-            this.tweens.add({
-                targets: this.spotlight,
-                alpha: 0,
-                duration: onDuration,
-                ease: 'Quart.easeIn',
-                onComplete: () => {
-                    this.pressedLightSwitch = false
-                    this.lightSwitchSound.play()
-                }
-            });
-            this.tweens.add({
-                targets: this.lightOnMusic,
-                volume: 0,
-                duration: onDuration,
-                ease: 'Quart.easeIn'
-            });
-            this.tweens.add({
-                targets: this.backgroundMusic,
-                volume: 0.8,
-                duration: onDuration,
-                ease: 'Quart.easeIn'
-            })
+        if (!this.pressingLightSwitch && !this.lightTriggeringOff) {
+            if (this.lightTurningOff && !this.lightTriggeringOff) {
+                this.cancelLightAnimations()
+                this.lightTriggeringOff = this.tweens.add({
+                    targets: this.spotlight,
+                    alpha: 0,
+                    duration: onDuration,
+                    ease: 'Quart.easeIn',
+                    onComplete: () => {
+                        this.lightTriggeringOff = null;
+                        this.pressedLightSwitch = false
+                        this.lightSwitchSound.play()
+                    }
+                })
+                this.tweens.add({
+                    targets: this.lightOnMusic,
+                    volume: 0,
+                    duration: onDuration,
+                    ease: 'Quart.easeIn'
+                });
+                this.tweens.add({
+                    targets: this.backgroundMusic,
+                    volume: 0.8,
+                    duration: onDuration,
+                    ease: 'Quart.easeIn'
+                })
+            } else {
+                this.cancelLightAnimations()
+                this.lightTurningOff = this.tweens.add({
+                    targets: this.spotlight,
+                    alpha: 0,
+                    duration: onDuration,
+                    ease: 'Quart.easeIn',
+                    onComplete: () => {
+                        this.lightTurningOff = null;
+                        this.pressedLightSwitch = false
+                        this.lightSwitchSound.play()
+                    }
+                })
+                this.tweens.add({
+                    targets: this.lightOnMusic,
+                    volume: 0,
+                    duration: onDuration,
+                    ease: 'Quart.easeIn'
+                });
+                this.tweens.add({
+                    targets: this.backgroundMusic,
+                    volume: 0.8,
+                    duration: onDuration,
+                    ease: 'Quart.easeIn'
+                })
+            }
+        }
+    }
+
+    cancelLightAnimations() {
+        if (this.lightTurningOn) {
+            this.lightTurningOn.stop();
+            this.lightTurningOn = null;
+        }
+        if (this.lightTurningOff) {
+            this.lightTurningOff.stop();
+            this.lightTurningOff = null;
+        }
+        if (this.lightTriggeringOff) {
+            this.lightTriggeringOff.stop();
+            this.lightTriggeringOff = null;
         }
     }
 
@@ -190,11 +231,24 @@ class SceneMain extends Phaser.Scene {
         // placing sprites in the center of the screen
         this.door = this.physics.add.sprite(this.centerX, this.centerY, 'door');
         this.door.setScale(0.25);
+        this.door.setDepth(1)
         this.light = this.physics.add.sprite(this.centerX, this.centerY, 'light');
 
         // placing hero in the center of the screen
         this.hero = this.physics.add.sprite(this.centerX, this.centerY, 'hero');
         this.hero.setScale(0.1)
+        this.hero.setDepth(11)
+
+        // Standard floor tiles
+        this.floorGroup  = this.physics.add.group();
+
+        // Trigger floor tiles that will switch off the light
+        this.triggerFloorGroup  = this.physics.add.group();
+        this.triggerFloorGroup.enableBody = true;
+        this.triggerFloorGroup.physicsBodyType = Phaser.Physics.ARCADE;
+        this.physics.add.overlap(this.hero, this.triggerFloorGroup, () => {
+            this.turnOffLight({onDuration: 500})
+        });
 
         // collider between hero and edge of the scene
         this.hero.body.collideWorldBounds = true;
@@ -237,10 +291,19 @@ class SceneMain extends Phaser.Scene {
         // generate game screen from bi-dimensional array on sceneMap
         let count = 0;
         let wall;
+        let floor;
+        let trigger_floor;
         levels[levelCounter].forEach(row => {
             row.forEach(position => {
+                floor = this.floorGroup.create(this.centerX, this.centerY, 'floor').setScale(this.alignGrid.scaleToTileSize());
+                floor.body.immovable = true;
+                this.alignGrid.placeAtIndex(count, floor);
+
                 switch(position) {
-                    case 'f':
+                    case 't':
+                        trigger_floor = this.triggerFloorGroup.create(this.centerX, this.centerY, 'trigger_floor').setScale(this.alignGrid.scaleToTileSize());
+                        trigger_floor.body.immovable = true;
+                        this.alignGrid.placeAtIndex(count, trigger_floor);
                         break;
                     case 'w':
                             // Attention future people - do this for a dynamic group of sprites with collision
@@ -252,7 +315,7 @@ class SceneMain extends Phaser.Scene {
                     case 'd':
                         this.alignGrid.placeAtIndex(count, this.door);
                         break;
-                    case 't':
+                    case 'l':
                         this.alignGrid.placeAtIndex(count, this.light);
                         break;
                     case 'h':
@@ -267,6 +330,7 @@ class SceneMain extends Phaser.Scene {
         this.foreground = this.add.image(0, 0, 'foreground')
         this.foreground.scaleX = this.game.config.width / this.foreground.scaleX
         this.foreground.scaleY = this.game.config.height / this.foreground.scaleY
+        this.foreground.setDepth(5);
         
         this.spotlight = this.make.sprite({
             x: 300,
@@ -303,6 +367,14 @@ class SceneMain extends Phaser.Scene {
 
         this.lightOnMusic = this.sound.add('lightOnMusic', {loop: true, volume: 0});
         this.lightOnMusic.play()
+        
+        this.lightTurningOn = null;
+        this.lightTurningOff = null;
+        this.lightTriggeringOff = null;
+
+        this.touchedLight = false;
+        this.pressingLightSwitch = false;
+        this.pressedLightSwitch = false;
     }
 
     nextLevel = () => {
@@ -315,6 +387,7 @@ class SceneMain extends Phaser.Scene {
             this.hero.destroy();
             this.light.destroy();
             this.door.destroy();
+            this.foreground.destroy();
             this.buildMap(levels, this.levelCounter)
         }
     }
