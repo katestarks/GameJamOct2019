@@ -387,6 +387,7 @@ class SceneMain extends Phaser.Scene {
             this.hero.destroy();
             this.light.destroy();
             this.door.destroy();
+            this.foreground.destroy();
             this.buildMap(levels, this.levelCounter)
         }
     }
