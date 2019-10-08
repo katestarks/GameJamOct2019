@@ -107,108 +107,56 @@ class SceneMain extends Phaser.Scene {
         this.light.alpha = alpha
     }
 
-    turnLightOn(durationParam) {
+    turnLightOn(durationParam, alphaStepParam) {
         let onDuration;
+        let alphaStep;
+        // if no params, use default values
         if (arguments.length == 0) {
             onDuration = 10000;
+            alphaStep = 500;
         } else {
             onDuration = durationParam;
+            alphaStep = alphaStepParam;
         }
         if (!this.isLightOn) {
+            this.isLightOn = true;
+            this.isDoorAvailable = true;
+            
             this.lightSwitchSound.play();
             this.backgroundMusic.stop();
             this.lightOnMusic.play();
-            this.tweens.add({
+
+            this.fadeLightOn = this.tweens.add({
                 targets: this.spotlight,
                 alpha: 1,
                 duration: 500,
-                ease: 'Sine.easeIn',
-                onComplete: () => {
-                    this.tweens.add({
-                        targets: this.spotlight,
-                        alpha: 0,
-                        duration: onDuration,
-                        ease: 'Sine.easeIn',
-                        onComplete: () => {
-                            this.turnLightOff();
-                        }
-                    })
-                }
-            });
-            this.isLightOn = true;
-            this.isDoorAvailable = true;
+                ease: 'Quart.easeIn'
+            })
+            this.fadeLightOff = setInterval(() => {
+                this.spotlight.alpha -= 0.05;
+            }, alphaStep);
+            this.fadeLightOffTimeout = setTimeout(() => {
+                clearInterval(this.fadeLightOff);
+                this.spotlight.alpha = 0;
+                this.isLightOn = false;
+                this.lightSwitchSound.play();
+                this.lightOnMusic.stop();
+                this.backgroundMusic.play();
+            }, onDuration);
         }
     }
 
     turnLightOff() {
         if (this.isLightOn) {
-            this.lightSwitchSound.play();
-            this.backgroundMusic.play();
-            this.lightOnMusic.stop();
-            this.spotlight.alpha = 0;
             this.isLightOn = false;
+            clearInterval(this.fadeLightOff);
+            clearTimeout(this.fadeLightOffTimeout);
+            this.spotlight.alpha = 0;
+            this.lightSwitchSound.play();
+            this.lightOnMusic.stop();
+            this.backgroundMusic.play();
         }
     }
-
-    // turnOffLight(options = {}) {
-    //     let onDuration = 10000
-    //     if ('onDuration' in options) {
-    //         onDuration = options.onDuration
-    //     }
-    //     // if (!this.pressingLightSwitch && !this.lightTriggeringOff) {
-    //         if (this.lightTurningOff && !this.lightTriggeringOff) {
-    //             this.cancelLightAnimations()
-    //             this.lightTriggeringOff = this.tweens.add({
-    //                 targets: this.spotlight,
-    //                 alpha: 0,
-    //                 duration: onDuration,
-    //                 ease: 'Quart.easeIn',
-    //                 onComplete: () => {
-    //                     this.lightTriggeringOff = true;
-    //                     this.pressedLightSwitch = false
-    //                     this.lightSwitchSound.play()
-    //                 }
-    //             })
-    //             this.tweens.add({
-    //                 targets: this.lightOnMusic,
-    //                 volume: 0,
-    //                 duration: onDuration,
-    //                 ease: 'Quart.easeIn'
-    //             });
-    //             this.tweens.add({
-    //                 targets: this.backgroundMusic,
-    //                 volume: 0.8,
-    //                 duration: onDuration,
-    //                 ease: 'Quart.easeIn'
-    //             })
-    //         } else {
-    //             this.cancelLightAnimations()
-    //             this.lightTurningOff = this.tweens.add({
-    //                 targets: this.spotlight,
-    //                 alpha: 0,
-    //                 duration: onDuration,
-    //                 ease: 'Quart.easeIn',
-    //                 onComplete: () => {
-    //                     this.lightTurningOff = null;
-    //                     this.pressedLightSwitch = false
-    //                     this.lightSwitchSound.play()
-    //                 }
-    //             })
-    //             this.tweens.add({
-    //                 targets: this.lightOnMusic,
-    //                 volume: 0,
-    //                 duration: onDuration,
-    //                 ease: 'Quart.easeIn'
-    //             });
-    //             this.tweens.add({
-    //                 targets: this.backgroundMusic,
-    //                 volume: 0.8,
-    //                 duration: onDuration,
-    //                 ease: 'Quart.easeIn'
-    //             })
-    //         // }
-    //     }
-    // }
 
     buildMap = (levels, levelCounter) => {
 
@@ -220,10 +168,8 @@ class SceneMain extends Phaser.Scene {
         this.centerX = this.game.config.width/2;
         this.centerY = this.game.config.height/2;
 
-
         // generate keyboard keys
         this.cursors = this.input.keyboard.createCursorKeys();
-
 
         // create grid on the game scene
         this.gridConfig = {rows: 10, cols: 10, scene: this};
@@ -392,6 +338,8 @@ class SceneMain extends Phaser.Scene {
             this.foreground.destroy();
             this.backgroundMusic.destroy();
             this.lightOnMusic.destroy();
+            clearInterval(this.fadeLightOff);
+            clearTimeout(this.fadeLightOffTimeout);
             this.isLightOn = false;
             this.isDoorAvailable = false;
             this.buildMap(levels, this.levelCounter)
