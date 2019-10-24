@@ -79,7 +79,7 @@ class SceneMain extends Phaser.Scene {
         if (this.pressedLightSwitch && this.lightTurningOff === null && distance > 85) {
             this.pressedLightSwitch = false
             this.pressingLightSwitch = false
-            this.turnOffLight({onDuration: 20000})
+            // this.turnOffLight({onDuration: 20000})
         }
 
         // If hero is moving in any direction
@@ -88,6 +88,7 @@ class SceneMain extends Phaser.Scene {
             this.foreground.mask.bitmapMask.x = this.hero.x
             this.foreground.mask.bitmapMask.y = this.hero.y
         }
+
     }
 
     distanceFromHero(el) 
@@ -106,96 +107,54 @@ class SceneMain extends Phaser.Scene {
         this.light.alpha = alpha
     }
 
-    turnOnLight(options = {}) {
-        this.touchedLight = true;
-        this.pressingLightSwitch = true
-        if (!this.pressedLightSwitch) {
-            this.cancelLightAnimations()
+    turnLightOn(durationParam, alphaStepParam) {
+        let onDuration;
+        let alphaStep;
+        // if no params, use default values
+        if (arguments.length == 0) {
+            onDuration = 10000;
+            alphaStep = 500;
+        } else {
+            onDuration = durationParam;
+            alphaStep = alphaStepParam;
+        }
+        if (!this.isLightOn) {
+            this.isLightOn = true;
+            this.isDoorAvailable = true;
+            
             this.lightSwitchSound.play();
-            this.backgroundMusic.volume = 0;
-            this.lightOnMusic.volume = 0.8;
-            this.lightTurningOn = this.tweens.add({
+            this.backgroundMusic.stop();
+            this.lightOnMusic.play();
+
+            this.fadeLightOn = this.tweens.add({
                 targets: this.spotlight,
                 alpha: 1,
                 duration: 500,
-                ease: 'Sine.easeIn'
-            });
-            this.pressedLightSwitch = true
+                ease: 'Quart.easeIn'
+            })
+            this.fadeLightOff = setInterval(() => {
+                this.spotlight.alpha -= 0.05;
+            }, alphaStep);
+            this.fadeLightOffTimeout = setTimeout(() => {
+                clearInterval(this.fadeLightOff);
+                this.spotlight.alpha = 0;
+                this.isLightOn = false;
+                this.lightSwitchSound.play();
+                this.lightOnMusic.stop();
+                this.backgroundMusic.play();
+            }, onDuration);
         }
     }
 
-    turnOffLight(options = {}) {
-        let onDuration = 10000
-        if ('onDuration' in options) {
-            onDuration = options.onDuration
-        }
-        if (!this.pressingLightSwitch && !this.lightTriggeringOff) {
-            if (this.lightTurningOff && !this.lightTriggeringOff) {
-                this.cancelLightAnimations()
-                this.lightTriggeringOff = this.tweens.add({
-                    targets: this.spotlight,
-                    alpha: 0,
-                    duration: onDuration,
-                    ease: 'Quart.easeIn',
-                    onComplete: () => {
-                        this.lightTriggeringOff = null;
-                        this.pressedLightSwitch = false
-                        this.lightSwitchSound.play()
-                    }
-                })
-                this.tweens.add({
-                    targets: this.lightOnMusic,
-                    volume: 0,
-                    duration: onDuration,
-                    ease: 'Quart.easeIn'
-                });
-                this.tweens.add({
-                    targets: this.backgroundMusic,
-                    volume: 0.8,
-                    duration: onDuration,
-                    ease: 'Quart.easeIn'
-                })
-            } else {
-                this.cancelLightAnimations()
-                this.lightTurningOff = this.tweens.add({
-                    targets: this.spotlight,
-                    alpha: 0,
-                    duration: onDuration,
-                    ease: 'Quart.easeIn',
-                    onComplete: () => {
-                        this.lightTurningOff = null;
-                        this.pressedLightSwitch = false
-                        this.lightSwitchSound.play()
-                    }
-                })
-                this.tweens.add({
-                    targets: this.lightOnMusic,
-                    volume: 0,
-                    duration: onDuration,
-                    ease: 'Quart.easeIn'
-                });
-                this.tweens.add({
-                    targets: this.backgroundMusic,
-                    volume: 0.8,
-                    duration: onDuration,
-                    ease: 'Quart.easeIn'
-                })
-            }
-        }
-    }
-
-    cancelLightAnimations() {
-        if (this.lightTurningOn) {
-            this.lightTurningOn.stop();
-            this.lightTurningOn = null;
-        }
-        if (this.lightTurningOff) {
-            this.lightTurningOff.stop();
-            this.lightTurningOff = null;
-        }
-        if (this.lightTriggeringOff) {
-            this.lightTriggeringOff.stop();
-            this.lightTriggeringOff = null;
+    turnLightOff() {
+        if (this.isLightOn) {
+            this.isLightOn = false;
+            clearInterval(this.fadeLightOff);
+            clearTimeout(this.fadeLightOffTimeout);
+            this.spotlight.alpha = 0;
+            this.lightSwitchSound.play();
+            this.lightOnMusic.stop();
+            this.backgroundMusic.play();
         }
     }
 
@@ -209,10 +168,8 @@ class SceneMain extends Phaser.Scene {
         this.centerX = this.game.config.width/2;
         this.centerY = this.game.config.height/2;
 
-
         // generate keyboard keys
         this.cursors = this.input.keyboard.createCursorKeys();
-
 
         // create grid on the game scene
         this.gridConfig = {rows: 10, cols: 10, scene: this};
@@ -247,7 +204,7 @@ class SceneMain extends Phaser.Scene {
         this.triggerFloorGroup.enableBody = true;
         this.triggerFloorGroup.physicsBodyType = Phaser.Physics.ARCADE;
         this.physics.add.overlap(this.hero, this.triggerFloorGroup, () => {
-            this.turnOffLight({onDuration: 500})
+            this.turnLightOff();
         });
 
         // collider between hero and edge of the scene
@@ -298,6 +255,7 @@ class SceneMain extends Phaser.Scene {
                 floor = this.floorGroup.create(this.centerX, this.centerY, 'floor').setScale(this.alignGrid.scaleToTileSize());
                 floor.body.immovable = true;
                 this.alignGrid.placeAtIndex(count, floor);
+
                 switch(position) {
                     case 't':
                         trigger_floor = this.triggerFloorGroup.create(this.centerX, this.centerY, 'trigger_floor').setScale(this.alignGrid.scaleToTileSize());
@@ -356,28 +314,19 @@ class SceneMain extends Phaser.Scene {
         this.light.alpha = 0;
 
 
-        this.physics.add.overlap(this.hero, this.light, () => this.turnOnLight(), null, this);
-        this.pressedLightSwitch = false
+        this.physics.add.overlap(this.hero, this.light, () => this.turnLightOn(), null, this);
 
         this.lightSwitchSound = this.sound.add('lightSwitch')
 
-        this.backgroundMusic = this.sound.add('backgroundMusic', {loop: true, volume: 0.5});
+        this.backgroundMusic = this.sound.add('backgroundMusic', {loop: true, volume: 0.8});
         this.backgroundMusic.play();
 
-        this.lightOnMusic = this.sound.add('lightOnMusic', {loop: true, volume: 0});
-        this.lightOnMusic.play()
+        this.lightOnMusic = this.sound.add('lightOnMusic', {loop: true, volume: 0.8});
         
-        this.lightTurningOn = null;
-        this.lightTurningOff = null;
-        this.lightTriggeringOff = null;
-
-        this.touchedLight = false;
-        this.pressingLightSwitch = false;
-        this.pressedLightSwitch = false;
     }
 
     nextLevel = () => {
-        if(this.touchedLight) {
+        if(this.isDoorAvailable) {
             this.levelCounter++;
             if(this.levelCounter >= levels.length) {
                 this.levelCounter = 0
@@ -387,8 +336,12 @@ class SceneMain extends Phaser.Scene {
             this.light.destroy();
             this.door.destroy();
             this.foreground.destroy();
-            this.backgroundMusic.stop()
-            this.lightOnMusic.stop()
+            this.backgroundMusic.destroy();
+            this.lightOnMusic.destroy();
+            clearInterval(this.fadeLightOff);
+            clearTimeout(this.fadeLightOffTimeout);
+            this.isLightOn = false;
+            this.isDoorAvailable = false;
             this.buildMap(levels, this.levelCounter)
         }
     }
